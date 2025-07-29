@@ -22,26 +22,26 @@ namespace BoomFramework
         private const string FrameWorkName = "BoomFramework";
         private GameObject _frameWorkRoot;
         private Transform _frameWorkRootTransform;
-        private ServiceLocator _serviceLocator;
-        private IManager[] _monoManagers;
+        private ServiceContainer _serviceLocator;
+        private MgrMonoBase[] _monoManagers;
 
         public override void Awake()
         {
             base.Awake();
             _frameWorkRoot = this.gameObject;
             _frameWorkRootTransform = _frameWorkRoot.transform;
-            _serviceLocator = ServiceLocator.Instance;
+            _serviceLocator = ServiceContainer.Instance;
 
             _frameWorkRoot.name = FrameWorkName;
 
-            Debug.Log("==========初始化静态门户API==========");
-            InitStaticAPI();
-
-            Debug.Log("==========初始化管理器==========");
-            InitMonoManager();
+            Debug.Log("==========初始化管理器Mono==========");
+            InitMgrMono();
 
             Debug.Log("==========注册业务服务==========");
             RegisterService();
+
+            Debug.Log("==========初始化静态门户API==========");
+            InitStaticAPI();
 
             Debug.Log("==========启动入口脚本==========");
             StartGameProject();
@@ -50,19 +50,19 @@ namespace BoomFramework
         private void InitStaticAPI()
         {
             Debug.Log("事件管理器, 初始化");
-            BoomEvent.Init(new EventManager());
+            BoomEvent.Init(_serviceLocator.GetService<IEventMgr>());
         }
 
-        private void InitMonoManager()
+        private void InitMgrMono()
         {
-            _monoManagers = _frameWorkRoot.GetComponentsInChildren<IManager>();
+            _monoManagers = _frameWorkRoot.GetComponentsInChildren<MgrMonoBase>();
             foreach (var manager in _monoManagers)
             {
                 manager.Init();
             }
         }
 
-        private void UnInitMonoManager()
+        private void UnInitMgrMono()
         {
             foreach (var manager in _monoManagers)
             {
@@ -72,12 +72,20 @@ namespace BoomFramework
 
         private void RegisterService()
         {
+            // 首先注册框架自身到服务容器，供其他服务使用（如ABMgr需要启动协程）
+            _serviceLocator.RegisterService<BoomFrameworkMono>(this);
 
+            var serviceRegisters = ReflectionUtility.GetAllTypes<IServiceRegister>();
+            foreach (var serviceRegister in serviceRegisters)
+            {
+                var serviceRegisterInstance = Activator.CreateInstance(serviceRegister) as IServiceRegister;
+                serviceRegisterInstance.RegisterServices(_serviceLocator);
+            }
         }
 
         void OnDestroy()
         {
-            UnInitMonoManager();
+            UnInitMgrMono();
         }
     }
 }

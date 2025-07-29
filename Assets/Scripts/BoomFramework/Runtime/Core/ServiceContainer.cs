@@ -8,7 +8,7 @@ namespace BoomFramework
     /// <summary>
     /// 服务定位器
     /// </summary>
-    public class ServiceLocator : Singleton<ServiceLocator>
+    public class ServiceContainer : Singleton<ServiceContainer>
     {
         /// <summary> 服务容器 </summary>
         private Dictionary<Type, object> _servicesDict = new();
@@ -34,7 +34,7 @@ namespace BoomFramework
         /// <returns>是否注销成功</returns>
         public bool UnRegisterService<T>() where T : class
         {
-            return _servicesDict.Remove(typeof(T)) && _servicesDict.ContainsKey(typeof(T));
+            return _servicesDict.Remove(typeof(T));
         }
 
         /// <summary> 获取服务 </summary>

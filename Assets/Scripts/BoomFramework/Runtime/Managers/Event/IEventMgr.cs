@@ -8,7 +8,7 @@ namespace BoomFramework
     /// <summary>
     /// 事件管理器接口
     /// </summary>
-    public interface IEventManager : IManager
+    public interface IEventMgr
     {
         /// <summary>
         /// 监听的事件数量

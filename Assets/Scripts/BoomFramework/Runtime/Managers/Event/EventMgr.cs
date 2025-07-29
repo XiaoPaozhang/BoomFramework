@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public class EventManager : IEventManager
+    public class EventMgr : IEventMgr
     {
         /// <summary>
         /// 监听事件字典

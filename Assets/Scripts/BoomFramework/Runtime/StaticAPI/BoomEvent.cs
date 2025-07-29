@@ -9,14 +9,13 @@ namespace BoomFramework
     /// </summary>
     public static class BoomEvent
     {
-        private static IEventManager _eventManager;
+        private static IEventMgr _eventManager;
         /// <summary>
         /// 获取事件管理器实例
         /// </summary>
-        public static void Init(IEventManager eventManager)
+        public static void Init(IEventMgr eventManager)
         {
             _eventManager = eventManager;
-            _eventManager.Init();
         }
 
         /// <summary>
@@ -82,10 +81,5 @@ namespace BoomFramework
         /// 获取当前监听的事件数量
         /// </summary>
         public static int ListenerEventCount => _eventManager?.ListenerEventCount ?? 0;
-
-        /// <summary>
-        /// 检查事件管理器是否已初始化
-        /// </summary>
-        public static bool IsInit => _eventManager?.IsInit ?? false;
     }
 }

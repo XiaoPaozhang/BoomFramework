@@ -8,28 +8,26 @@ using UnityEngine;
 namespace BoomFramework
 {
     /// <summary>
-    /// 需要继承mono的管理器基类
+    /// 管理器所对应的mono节点 - 用于为管理器提供Mono相关功能
     /// </summary>
-    public class MonoManager : MonoBehaviour, IManager
+    public abstract class MgrMonoBase : MonoBehaviour
     {
         [SerializeField]
         [LabelText("是否启用")]
-        private bool _isEnable;
+        private bool _isEnable = true;
         public bool IsInit { get; private set; }
 
-        void IManager.Init()
+        public void Init()
         {
             if (!_isEnable) return;
             OnInit();
             IsInit = true;
         }
-
-        void IManager.UnInit()
+        public void UnInit()
         {
             OnUnInit();
             IsInit = false;
         }
-
         protected virtual void OnInit()
         {
             Debug.Log($"{this.GetType().Name} 初始化");
