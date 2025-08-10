@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public class UIMono : MgrMonoBase
+    public class UIMono : ManagerMonoBase
     {
         protected override void OnInit()
         {

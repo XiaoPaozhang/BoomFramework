@@ -6,22 +6,22 @@ namespace BoomFramework
     /// 资源管理器测试示例
     /// 展示通过Inspector配置的资源加载方式
     /// </summary>
-    public class ResourceMgrTest : MonoBehaviour
+    public class AssetMgrTest : MonoBehaviour
     {
-        private IResourceMgr _resourceMgr;
+        private BoomFramework.IAssetLoadManager _assetLoadManager;
         private string _path = "Cube";
 
         void Start()
         {
             // 获取根据Inspector配置创建的资源管理器
-            _resourceMgr = ServiceContainer.Instance.GetService<IResourceMgr>();
+            _assetLoadManager = ServiceContainer.Instance.GetService<BoomFramework.IAssetLoadManager>();
 
-            if (_resourceMgr != null)
+            if (_assetLoadManager != null)
             {
-                Debug.Log($"获取到资源管理器: {_resourceMgr.GetType().Name}");
+                Debug.Log($"获取到资产服务: {_assetLoadManager.GetType().Name}");
 
                 // 测试加载资源（需要在Resources文件夹下有这个资源）
-                var cube = _resourceMgr.LoadAsset<GameObject>(_path);
+                var cube = _assetLoadManager.LoadAsset<GameObject>(_path);
                 if (cube != null)
                 {
                     Instantiate(cube, transform);
@@ -29,7 +29,7 @@ namespace BoomFramework
             }
             else
             {
-                Debug.LogError("未找到资源管理器，请确保ResourceMono组件已正确配置并启用");
+                Debug.LogError("未找到资产服务，请确保资产提供组件已正确配置并启用");
             }
         }
 
@@ -37,13 +37,13 @@ namespace BoomFramework
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                if (_resourceMgr != null)
+                if (_assetLoadManager != null)
                 {
-                    Debug.Log($"当前使用的资源管理器: {_resourceMgr.GetType().Name}");
+                    Debug.Log($"当前使用的资产服务: {_assetLoadManager.GetType().Name}");
                 }
                 else
                 {
-                    Debug.LogWarning("资源管理器为空");
+                    Debug.LogWarning("资产服务为空");
                 }
             }
         }

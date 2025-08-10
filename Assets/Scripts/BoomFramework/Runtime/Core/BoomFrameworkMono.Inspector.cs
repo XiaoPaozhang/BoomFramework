@@ -14,7 +14,7 @@ namespace BoomFramework
         #region 启动器选择
 
         [SerializeField]
-        [LabelText("是否显示全名")]
+        [LabelText("是否显示启动器选项的全名")]
         private bool _isShowFullName;
 
         /// <summary>选中的启动器类型名称</summary>

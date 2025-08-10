@@ -8,9 +8,9 @@ using Object = UnityEngine.Object;
 namespace BoomFramework
 {
     /// <summary>
-    /// AssetBundle资源加载实现类
+    /// AssetBundle 资产加载实现类
     /// </summary>
-    public class ABMgr : IResourceMgr
+    public class ABManager : IAssetLoadManager
     {
         private readonly Dictionary<string, AssetBundle> _loadedAssetBundles = new Dictionary<string, AssetBundle>();
         private readonly Dictionary<string, Object> _assetCache = new Dictionary<string, Object>();
@@ -25,7 +25,7 @@ namespace BoomFramework
             // 加载AssetBundle清单文件
             LoadManifest();
 
-            Debug.Log($"ABMgr 初始化完成，AssetBundle路径: {_assetBundleRootPath}");
+            Debug.Log($"ABManager 初始化完成，AssetBundle路径: {_assetBundleRootPath}");
         }
 
         /// <summary>
@@ -386,7 +386,7 @@ namespace BoomFramework
             // 卸载所有AssetBundle
             UnloadAllResources(false);
 
-            Debug.Log("ABMgr 已清理完成");
+            Debug.Log("ABManager 已清理完成");
         }
     }
 }

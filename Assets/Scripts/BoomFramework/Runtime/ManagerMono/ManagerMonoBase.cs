@@ -10,7 +10,7 @@ namespace BoomFramework
     /// <summary>
     /// 管理器所对应的mono节点 - 用于为管理器提供Mono相关功能
     /// </summary>
-    public abstract class MgrMonoBase : MonoBehaviour
+    public abstract class ManagerMonoBase : MonoBehaviour
     {
         [SerializeField]
         [LabelText("是否启用")]

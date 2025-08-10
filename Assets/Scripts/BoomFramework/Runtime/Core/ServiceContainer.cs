@@ -24,6 +24,7 @@ namespace BoomFramework
             }
 
             _servicesDict[typeof(T)] = serviceInstance;
+            Debug.Log($"[{GetType().Name}]服务 {typeof(T).Name} 注册成功,服务: {serviceInstance}");
             return serviceInstance;
         }
 

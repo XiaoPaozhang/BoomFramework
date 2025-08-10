@@ -1,16 +1,17 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace BoomFramework
 {
-    public class EventMgr : IEventMgr
+    public class EventManager : IEventManager
     {
         /// <summary>
         /// 监听事件字典
         /// </summary>
-        private Dictionary<Type, List<object>> _eventListenerDict = new();
+        private Dictionary<Type, HashSet<Delegate>> _eventListenerDict = new();
         public int ListenerEventCount => _eventListenerDict.Count;
         public bool IsInit { get; private set; } = false;
 
@@ -26,7 +27,7 @@ namespace BoomFramework
 
             if (!_eventListenerDict.TryGetValue(typeof(T), out var actions))
             {
-                actions = new List<object>();
+                actions = new();
                 _eventListenerDict.Add(typeof(T), actions);
             }
 
@@ -45,6 +46,11 @@ namespace BoomFramework
             else
             {
                 actions.Remove(action);
+                // 若该事件类型已无任何监听者，从字典中移除键
+                if (actions.Count == 0)
+                {
+                    _eventListenerDict.Remove(typeof(T));
+                }
             }
         }
 
@@ -59,7 +65,9 @@ namespace BoomFramework
             }
             else
             {
-                foreach (var action in actions)
+                // 使用快照，避免在回调中增删监听导致的枚举异常
+                var snapshot = actions.ToArray();
+                foreach (var action in snapshot)
                 {
                     if (action is Action<T> typedAction)
                     {

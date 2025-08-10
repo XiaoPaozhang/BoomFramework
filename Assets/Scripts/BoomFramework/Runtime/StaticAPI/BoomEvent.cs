@@ -9,11 +9,11 @@ namespace BoomFramework
     /// </summary>
     public static class BoomEvent
     {
-        private static IEventMgr _eventManager;
+        private static IEventManager _eventManager;
         /// <summary>
         /// 获取事件管理器实例
         /// </summary>
-        public static void Init(IEventMgr eventManager)
+        public static void Init(IEventManager eventManager)
         {
             _eventManager = eventManager;
         }

@@ -8,8 +8,18 @@ namespace BoomFramework
     /// <summary>
     /// 事件管理器接口
     /// </summary>
-    public interface IEventMgr
+    public interface IEventManager
     {
+        /// <summary>
+        /// 是否已初始化
+        /// </summary>
+        bool IsInit { get; }
+
+        /// <summary>
+        /// 初始化事件管理器
+        /// </summary>
+        void Init();
+
         /// <summary>
         /// 监听的事件数量
         /// </summary>
@@ -36,5 +46,10 @@ namespace BoomFramework
         /// 清空所有事件
         /// </summary>
         void Clear();
+
+        /// <summary>
+        /// 反初始化/清理
+        /// </summary>
+        void UnInit();
     }
 }

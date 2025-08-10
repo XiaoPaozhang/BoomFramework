@@ -7,15 +7,15 @@ using Object = UnityEngine.Object;
 namespace BoomFramework
 {
     /// <summary>
-    /// Resources文件夹资源加载实现类
+    /// 使用 Unity Resources 的资产加载实现类
     /// </summary>
-    public class ResourceMgr : IResourceMgr
+    public class ResourceManager : IAssetLoadManager
     {
         private readonly Dictionary<string, Object> _assetCache = new Dictionary<string, Object>();
 
         public void Init()
         {
-            Debug.Log("ResourceMgr 初始化完成");
+            Debug.Log("ResourceManager 初始化完成");
         }
 
         public T LoadAsset<T>(string path) where T : Object
@@ -118,7 +118,7 @@ namespace BoomFramework
             // 卸载所有资源
             UnloadAllResources(false);
 
-            Debug.Log("ResourceMgr 已清理完成");
+            Debug.Log("ResourceManager 已清理完成");
         }
     }
 }

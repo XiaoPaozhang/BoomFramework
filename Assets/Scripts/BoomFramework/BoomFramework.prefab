@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 262806951651947854}
-  - component: {fileID: 262806951651947855}
+  - component: {fileID: 631995607}
   m_Layer: 0
   m_Name: ObjectPool
   m_TagString: Untagged
@@ -32,7 +32,7 @@ Transform:
   m_Father: {fileID: 262806951932109295}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &262806951651947855
+--- !u!114 &631995607
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,10 +41,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 262806951651947853}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 33b360774c25ec8448a9d6f4e0bb2f0b, type: 3}
+  m_Script: {fileID: 11500000, guid: deb26a50a99fac6468a97b9ec86196bd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isEnable: 0
+  _isEnable: 1
 --- !u!1 &262806951907583796
 GameObject:
   m_ObjectHideFlags: 0
@@ -56,7 +56,7 @@ GameObject:
   - component: {fileID: 262806951907583797}
   - component: {fileID: 2020497922}
   m_Layer: 0
-  m_Name: Resource
+  m_Name: AssetLoad
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -90,7 +90,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _isEnable: 1
-  _resourceType: 0
+  _providerType: 0
+  _editorRootRelativePath: 
 --- !u!1 &262806951932109293
 GameObject:
   m_ObjectHideFlags: 0
