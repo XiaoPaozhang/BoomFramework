@@ -47,14 +47,14 @@ namespace BoomFramework
             _poolsDict.Add(poolName, new ObjectPool(poolName, prefab, poolSize, parent));
         }
 
-        public GameObject RentObject(string poolName)
+        public GameObject GetObject(string poolName)
         {
             if (!_poolsDict.TryGetValue(poolName, out var objectPool))
             {
                 Debug.LogError($"对象池 {poolName} 不存在");
                 return null;
             }
-            var obj = objectPool.RentObject();
+            var obj = objectPool.GetObject();
             if (obj != null)
             {
                 _instanceToPool[obj.GetInstanceID()] = poolName;
@@ -62,9 +62,9 @@ namespace BoomFramework
             return obj;
         }
 
-        public GameObject RentObject(string poolName, Transform parent, Vector3? localPos = null, Quaternion? localRot = null)
+        public GameObject GetObject(string poolName, Transform parent, Vector3? localPos = null, Quaternion? localRot = null)
         {
-            var obj = RentObject(poolName);
+            var obj = GetObject(poolName);
             if (obj == null) return null;
 
             if (parent != null)
@@ -82,7 +82,7 @@ namespace BoomFramework
             return obj;
         }
 
-        public void ReturnObject(string poolName, GameObject obj)
+        public void RecycleObject(string poolName, GameObject obj)
         {
             if (!_poolsDict.TryGetValue(poolName, out var objectPool))
             {
@@ -95,13 +95,13 @@ namespace BoomFramework
                 Debug.LogWarning($"对象池归还不一致：传入 {poolName}，登记为 {recordedPool}，已按登记归还");
                 if (_poolsDict.TryGetValue(recordedPool, out var recordedObjectPool))
                 {
-                    recordedObjectPool.ReturnObject(obj);
+                    recordedObjectPool.RecycleObject(obj);
                     _instanceToPool.Remove(obj.GetInstanceID());
                     return;
                 }
             }
 
-            objectPool.ReturnObject(obj);
+            objectPool.RecycleObject(obj);
             if (obj != null)
             {
                 _instanceToPool.Remove(obj.GetInstanceID());
@@ -109,11 +109,11 @@ namespace BoomFramework
         }
 
         // 便捷归还：无需指定池名
-        public void ReturnObject(GameObject obj)
+        public void RecycleObject(GameObject obj)
         {
             if (obj == null)
             {
-                Debug.LogWarning("ReturnObject 传入空对象");
+                Debug.LogWarning("RecycleObject 传入空对象");
                 return;
             }
             var id = obj.GetInstanceID();
@@ -122,9 +122,9 @@ namespace BoomFramework
                 Debug.LogWarning($"未找到对象 {obj.name} 的归属池，可能未从池租借或已被外部销毁/重复归还");
                 return;
             }
-            ReturnObject(poolName, obj);
+            RecycleObject(poolName, obj);
         }
-        public void ReturnAllObjects(string poolName)
+        public void RecycleAllObjects(string poolName)
         {
             if (!_poolsDict.TryGetValue(poolName, out var objectPool))
             {
@@ -147,7 +147,7 @@ namespace BoomFramework
             }
 
             // 再调用池内召回
-            objectPool.ReturnAllObjects();
+            objectPool.RecycleAllObjects();
         }
         public void RemovePool(string poolName)
         {
@@ -157,7 +157,7 @@ namespace BoomFramework
                 return;
             }
             // 尝试先召回活跃对象，避免遗留登记
-            objectPool.ReturnAllObjects();
+            objectPool.RecycleAllObjects();
             // 清理登记中属于该池的实例
             var snapshot = new List<int>();
             foreach (var kv in _instanceToPool)
@@ -179,7 +179,7 @@ namespace BoomFramework
         {
             foreach (var pool in _poolsDict)
             {
-                pool.Value.ReturnAllObjects();
+                pool.Value.RecycleAllObjects();
                 pool.Value.Clear();
             }
             _poolsDict.Clear();

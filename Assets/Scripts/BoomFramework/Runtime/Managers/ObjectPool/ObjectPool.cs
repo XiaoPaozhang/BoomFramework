@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public class ObjectPool
+    public class ObjectPool : IObjectPool
     {
         /// <summary>
         /// 池子名称
@@ -64,7 +64,7 @@ namespace BoomFramework
             }
         }
 
-        public GameObject RentObject()
+        public GameObject GetObject()
         {
             GameObject obj = _idleObjects.Count > 0
                 ? _idleObjects.Pop()
@@ -76,7 +76,7 @@ namespace BoomFramework
             return obj;
         }
 
-        public void ReturnObject(GameObject obj)
+        public void RecycleObject(GameObject obj)
         {
             if (obj == null)
             {
@@ -95,7 +95,7 @@ namespace BoomFramework
             _idleObjects.Push(obj);
         }
 
-        public void ReturnAllObjects()
+        public void RecycleAllObjects()
         {
             if (_activeObjects.Count == 0) return;
 
@@ -103,7 +103,7 @@ namespace BoomFramework
             var snapshot = new List<GameObject>(_activeObjects);
             for (int i = 0; i < snapshot.Count; i++)
             {
-                ReturnObject(snapshot[i]);
+                RecycleObject(snapshot[i]);
             }
         }
 

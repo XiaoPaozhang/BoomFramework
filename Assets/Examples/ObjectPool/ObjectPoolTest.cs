@@ -44,19 +44,19 @@ namespace BoomFramework
 
             if (hasCubePool)
             {
-                // 租借对象
+                // 获取对象
                 for (int i = 0; i < _RentCount; i++)
                 {
-                    var cubeobj = _objectPoolManager.RentObject("Cube", Camera.main.transform);
+                    var cubeobj = _objectPoolManager.GetObject("Cube");
                 }
-                StartCoroutine(ReturnObjectAll());
+                StartCoroutine(RecycleObjectAll());
             }
         }
 
-        private IEnumerator ReturnObjectAll()
+        private IEnumerator RecycleObjectAll()
         {
             yield return new WaitForSeconds(_delayReturnTime);
-            _objectPoolManager.ReturnAllObjects("Cube");
+            _objectPoolManager.RecycleAllObjects("Cube");
         }
 
         void Update()

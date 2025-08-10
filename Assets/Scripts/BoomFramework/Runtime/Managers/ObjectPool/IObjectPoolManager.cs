@@ -26,25 +26,25 @@ namespace BoomFramework
         /// </summary>
         void CreatePool(string poolName, GameObject prefab, Transform parent, int poolSize);
         /// <summary>
-        /// 租借对象
+        /// 获取对象
         /// </summary>
-        GameObject RentObject(string poolName);
+        GameObject GetObject(string poolName);
         /// <summary>
-        /// 租借对象（便捷重载，设置父级与位姿）
+        /// 获取对象
         /// </summary>
-        GameObject RentObject(string poolName, Transform parent, Vector3? localPos = null, Quaternion? localRot = null);
+        GameObject GetObject(string poolName, Transform parent, Vector3? localPos = null, Quaternion? localRot = null);
         /// <summary>
-        /// 归还对象
+        /// 回收对象
         /// </summary>
-        void ReturnObject(GameObject obj);
+        void RecycleObject(GameObject obj);
         /// <summary>
-        /// 归还对象
+        /// 回收对象
         /// </summary>
-        void ReturnObject(string poolName, GameObject obj);
+        void RecycleObject(string poolName, GameObject obj);
         /// <summary>
-        /// 归还所有对象
+        /// 回收所有对象
         /// </summary>
-        void ReturnAllObjects(string poolName);
+        void RecycleAllObjects(string poolName);
         /// <summary>
         /// 删除对象池
         /// </summary>
