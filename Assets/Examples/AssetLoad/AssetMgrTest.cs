@@ -9,7 +9,7 @@ namespace BoomFramework
     public class AssetMgrTest : MonoBehaviour
     {
         private BoomFramework.IAssetLoadManager _assetLoadManager;
-        private string _path = "Cube";
+        private string _path = "Prefabs/Cube";
 
         void Start()
         {
