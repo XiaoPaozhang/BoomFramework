@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace BoomFramework
 {
+    /// <summary>
+    /// 对象池子
+    /// </summary>
     public class ObjectPool : IObjectPool
     {
         /// <summary>
@@ -90,6 +93,11 @@ namespace BoomFramework
                 return;
             }
 
+            // 还原到池的父节点，确保层级容器不堆积隐藏对象
+            if (obj.transform.parent != _parent)
+            {
+                obj.transform.SetParent(_parent, false);
+            }
             obj.SetActive(false);
             _activeObjects.Remove(obj);
             _idleObjects.Push(obj);

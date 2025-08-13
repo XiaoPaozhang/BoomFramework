@@ -18,7 +18,7 @@ namespace XpzUtility
 
         private string FormatPath => ToUnityPath(Path.Combine(selectedFolderPath, templateName));
 
-        [MenuItem("小炮仗的妙妙工具/学习unity的模板生成 %#_z")]
+        [MenuItem("BoomFramework/学习unity的模板生成 %#_z")]
         private static void ShowWindow()
         {
             // 创建并打开窗口

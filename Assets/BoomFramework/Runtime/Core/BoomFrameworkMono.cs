@@ -49,8 +49,8 @@ namespace BoomFramework
 
         private void InitStaticAPI()
         {
-            Debug.Log("事件管理器, 初始化");
             BoomEvent.Init(_serviceLocator.GetService<IEventManager>());
+            Debug.Log($"{nameof(IEventManager)}, 初始化成功");
         }
 
         private void InitMgrMono()
@@ -72,9 +72,6 @@ namespace BoomFramework
 
         private void RegisterService()
         {
-            // 首先注册框架自身到服务容器，供其他服务使用（如ABManager需要启动协程）
-            _serviceLocator.RegisterService<BoomFrameworkMono>(this);
-
             var serviceRegisters = ReflectionUtility.GetAllTypes<IServiceRegister>();
             foreach (var serviceRegister in serviceRegisters)
             {

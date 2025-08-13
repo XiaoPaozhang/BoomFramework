@@ -6,22 +6,6 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public enum AssetLoadModeType
-    {
-        /// <summary>
-        /// 编辑模式（使用 AssetDatabase）
-        /// </summary>
-        Editor,
-        /// <summary>
-        /// AB包模式（使用 AssetBundle）
-        /// </summary>
-        AssetBundle,
-        /// <summary>
-        /// 资源模式（使用 Resources）
-        /// </summary>
-        Resources,
-    }
-
     public class AssetLoadMono : ManagerMonoBase
     {
         #region Inspector 调试
@@ -62,7 +46,7 @@ namespace BoomFramework
         {
             switch (providerType)
             {
-                case AssetLoadModeType.Resources:
+                case AssetLoadModeType.Resources_路径不与其他模式同步固暂时不推荐用:
                     Debug.Log("创建 ResourceManager 实例");
                     return new ResourceManager();
 
@@ -104,5 +88,21 @@ namespace BoomFramework
             }
             _editorRootRelativePath = p;
         }
+    }
+
+    public enum AssetLoadModeType
+    {
+        /// <summary>
+        /// 编辑模式（使用 AssetDatabase）
+        /// </summary>
+        Editor,
+        /// <summary>
+        /// AB包模式（使用 AssetBundle）
+        /// </summary>
+        AssetBundle,
+        /// <summary>
+        /// 资源模式（使用 Resources）
+        /// </summary>
+        Resources_路径不与其他模式同步固暂时不推荐用,
     }
 }

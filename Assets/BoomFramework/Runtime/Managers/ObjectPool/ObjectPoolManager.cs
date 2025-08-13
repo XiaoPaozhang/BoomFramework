@@ -3,6 +3,9 @@ using UnityEngine;
 
 namespace BoomFramework
 {
+    /// <summary>
+    /// 对象池管理器
+    /// </summary>
     public class ObjectPoolManager : IObjectPoolManager
     {
         public bool IsInit { get; private set; }
@@ -44,7 +47,9 @@ namespace BoomFramework
                 Debug.LogError($"对象池 {poolName} 已经存在");
                 return;
             }
-            _poolsDict.Add(poolName, new ObjectPool(poolName, prefab, poolSize, parent));
+
+            ObjectPool objectPool = new(poolName, prefab, poolSize, parent);
+            _poolsDict.Add(poolName, objectPool);
         }
 
         public GameObject GetObject(string poolName)
@@ -59,6 +64,7 @@ namespace BoomFramework
             {
                 _instanceToPool[obj.GetInstanceID()] = poolName;
             }
+
             return obj;
         }
 

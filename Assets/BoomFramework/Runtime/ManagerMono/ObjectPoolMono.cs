@@ -19,7 +19,6 @@ namespace BoomFramework
 
             _objectPoolManager.Init(_assetManager);
 
-            // 注册到服务容器
             ServiceContainer.Instance.RegisterService<IObjectPoolManager>(_objectPoolManager);
         }
 
