@@ -116,7 +116,7 @@ namespace BoomFramework.EditorTools
             }
             else
             {
-                Debug.Log("[UIPartialGenerator] 无可用组件用于前缀循环，未进行任何修改。");
+                Debug.LogWarning("[UIPartialGenerator] 无可用组件用于前缀循环，未进行任何修改。");
             }
             return changed;
         }
@@ -142,7 +142,7 @@ namespace BoomFramework.EditorTools
             }
             else
             {
-                Debug.Log("[UIPartialGenerator] 选中项均无前缀可移除。");
+                Debug.LogWarning("[UIPartialGenerator] 选中项均无前缀可移除。");
             }
             return changed;
         }
@@ -346,7 +346,7 @@ namespace BoomFramework.EditorTools
             var entries = CollectEntries(go.transform);
             if (entries.Count == 0)
             {
-                Debug.Log("[UIPartialGenerator] 未找到符合命名规则的子节点，跳过绑定。");
+                Debug.LogWarning("[UIPartialGenerator] 未找到符合命名规则的子节点，跳过绑定。");
                 return;
             }
 

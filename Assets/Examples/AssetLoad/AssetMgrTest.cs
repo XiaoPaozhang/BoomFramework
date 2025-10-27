@@ -8,13 +8,13 @@ namespace BoomFramework
     /// </summary>
     public class AssetMgrTest : MonoBehaviour
     {
-        private BoomFramework.IAssetLoadManager _assetLoadManager;
+        private global::BoomFramework.IAssetLoadManager _assetLoadManager;
         private string _path = "Prefabs/Cube";
 
         void Start()
         {
             // 获取根据Inspector配置创建的资源管理器
-            _assetLoadManager = ServiceContainer.Instance.GetService<BoomFramework.IAssetLoadManager>();
+            _assetLoadManager = ServiceContainer.Instance.GetService<global::BoomFramework.IAssetLoadManager>();
 
             if (_assetLoadManager != null)
             {

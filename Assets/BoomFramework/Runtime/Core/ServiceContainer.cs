@@ -20,11 +20,11 @@ namespace BoomFramework
         {
             if (HasService<T>())
             {
-                Debug.Log($"服务 {typeof(T).Name} 已经注册,替换服务,新服务: {serviceInstance},旧服务: {_servicesDict[typeof(T)]}");
+                Debug.Log($"[服务注册]: {typeof(T).Name} 已注册,替换服务,新服务: {serviceInstance},旧服务: {_servicesDict[typeof(T)]}");
             }
 
             _servicesDict[typeof(T)] = serviceInstance;
-            Debug.Log($"[{GetType().Name}]服务 {typeof(T).Name} 注册成功,服务: {serviceInstance}");
+            Debug.Log($"[服务注册]: {typeof(T).Name} 实例: {serviceInstance}");
             return serviceInstance;
         }
 

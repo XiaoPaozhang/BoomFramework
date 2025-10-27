@@ -5,7 +5,7 @@ using UnityEngine;
 namespace BoomFramework
 {
     /// <summary>
-    /// mono 单例基类
+    /// C# 单例基类
     /// </summary>
     public class Singleton<T> where T : Singleton<T>, new()
     {

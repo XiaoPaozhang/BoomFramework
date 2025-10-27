@@ -1,0 +1,18 @@
+ManifestFileVersion: 0
+CRC: 2700268572
+AssetBundleManifest:
+  AssetBundleInfos:
+    Info_0:
+      Name: cube
+      Dependencies: {}
+    Info_1:
+      Name: ui
+      Dependencies:
+        Dependency_0: font
+    Info_2:
+      Name: font
+      Dependencies:
+        Dependency_0: shaders
+    Info_3:
+      Name: shaders
+      Dependencies: {}

@@ -1,5 +1,6 @@
 
 using System.Collections;
+using System.IO;
 using UnityEngine;
 
 namespace BoomFramework
@@ -19,11 +20,6 @@ namespace BoomFramework
             StartCoroutine(BackUI());
         }
 
-        void Update()
-        {
-
-        }
-
         private IEnumerator BackUI()
         {
             yield return new WaitForSeconds(delayTime);
@@ -32,9 +28,6 @@ namespace BoomFramework
             _uIManager.CloseUI<AboutUI>();
             yield return new WaitForSeconds(delayTime);
             _uIManager.OpenUI<HomeUI>("你好世界HomeUI");
-
-            // 测试关闭未打开的ui时的警告输出情况
-            _uIManager.CloseUI<AboutUI>();
         }
     }
 

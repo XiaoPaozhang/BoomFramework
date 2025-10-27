@@ -2,7 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace BoomFramework
@@ -12,29 +11,24 @@ namespace BoomFramework
     /// </summary>
     public abstract class ManagerMonoBase : MonoBehaviour
     {
-        [SerializeField]
-        [LabelText("是否启用")]
-        private bool _isEnable = true;
-        public bool IsInit { get; private set; }
-
+        public bool IsInited { get; private set; }
         public void Init()
         {
-            if (!_isEnable) return;
             OnInit();
-            IsInit = true;
+            IsInited = true;
         }
         public void UnInit()
         {
             OnUnInit();
-            IsInit = false;
+            IsInited = false;
         }
         protected virtual void OnInit()
         {
-            Debug.Log($"{this.GetType().Name} 初始化");
+            Debug.Log($"[管理器初始化]: {this.GetType().Name}");
         }
         protected virtual void OnUnInit()
         {
-            Debug.Log($"{this.GetType().Name} 销毁");
+            Debug.Log($"[管理器销毁]: {this.GetType().Name}");
         }
     }
 }

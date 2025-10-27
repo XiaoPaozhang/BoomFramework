@@ -8,7 +8,7 @@ namespace BoomFramework
     {
         public void Launch()
         {
-            Debug.Log("TestILauncher 启动");
+            
         }
     }
 }

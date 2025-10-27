@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -27,8 +28,8 @@ namespace BoomFramework
                 return cachedAsset as T;
             }
 
-            // 从Resources加载
-            var asset = Resources.Load<T>(path);
+            // 从Resources加载（支持自动添加扩展名）
+            T asset = LoadFromResources<T>(path);
             if (asset == null)
             {
                 Debug.LogWarning($"Resources加载失败: {path}");
@@ -93,6 +94,66 @@ namespace BoomFramework
             {
                 Debug.LogWarning($"要卸载的资源不在缓存中: {identifier}");
             }
+        }
+
+        /// <summary>
+        /// 从 Resources 加载资源，支持自动添加扩展名
+        /// </summary>
+        private T LoadFromResources<T>(string path) where T : Object
+        {
+            // 如果已经有扩展名，直接加载
+            if (HasExtension(path))
+            {
+                return Resources.Load<T>(path);
+            }
+
+            // 没有扩展名，尝试根据类型添加候选扩展名
+            var candidates = GetCandidateExtensionsForType<T>();
+            if (candidates.Length == 0)
+            {
+                // 没有候选扩展名，直接尝试加载
+                return Resources.Load<T>(path);
+            }
+
+            // 尝试每个候选扩展名
+            foreach (var ext in candidates)
+            {
+                var candidatePath = path + ext;
+                var asset = Resources.Load<T>(candidatePath);
+                if (asset != null)
+                {
+                    Debug.Log($"[ResourceManager] 使用扩展名 {ext} 加载成功: {candidatePath}");
+                    return asset;
+                }
+            }
+
+            // 所有候选扩展名都失败，最后尝试不带扩展名
+            return Resources.Load<T>(path);
+        }
+
+        /// <summary>
+        /// 检查路径是否包含扩展名
+        /// </summary>
+        private static bool HasExtension(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return !string.IsNullOrEmpty(ext);
+        }
+
+        /// <summary>
+        /// 根据资源类型获取候选扩展名
+        /// </summary>
+        private static string[] GetCandidateExtensionsForType<T>() where T : Object
+        {
+            var t = typeof(T);
+            if (t == typeof(GameObject)) return new[] { ".prefab" };
+            if (t == typeof(Texture2D) || t == typeof(Sprite)) return new[] { ".png", ".jpg", ".jpeg", ".tga", ".psd" };
+            if (t == typeof(Material)) return new[] { ".mat" };
+            if (t == typeof(AudioClip)) return new[] { ".wav", ".mp3", ".ogg" };
+            if (t == typeof(TextAsset)) return new[] { ".txt", ".json", ".bytes", ".xml" };
+            if (t == typeof(Shader)) return new[] { ".shader" };
+            // 兜底：不做猜测
+            return Array.Empty<string>();
         }
 
         /// <summary>

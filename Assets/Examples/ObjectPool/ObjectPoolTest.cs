@@ -2,8 +2,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
-using Sirenix.OdinInspector.Editor.Examples;
 using UnityEngine;
 
 namespace BoomFramework
@@ -15,12 +13,10 @@ namespace BoomFramework
         private IAssetLoadManager _assetLoadManager;
         private IObjectPoolManager _objectPoolManager;
         [SerializeField]
-        [LabelText("租借数量")]
         [Range(0, 10)]
         private int _RentCount = 5;
 
         [SerializeField]
-        [LabelText("延迟归还时间")]
         [Range(0, 5)]
         private int _delayReturnTime = 1;
 

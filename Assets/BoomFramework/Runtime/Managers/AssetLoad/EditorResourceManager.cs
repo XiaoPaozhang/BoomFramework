@@ -35,7 +35,6 @@ namespace BoomFramework
 
         public void Init()
         {
-            Debug.Log($"EditorResourceManager 初始化完成，根目录: {_rootPath}");
         }
 
         public T LoadAsset<T>(string path) where T : Object

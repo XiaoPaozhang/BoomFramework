@@ -1,15 +1,15 @@
 ManifestFileVersion: 0
-CRC: 2543236365
+CRC: 3301601196
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 00a069f0b9f7fcb5cc287f438e494280
+    Hash: b675cd7ae7db3d7ffef82a5040323f0f
   TypeTreeHash:
     serializedVersion: 2
     Hash: a3954d9da6324b836c32a89fa85d00a9
   IncrementalBuildHash:
     serializedVersion: 2
-    Hash: 00a069f0b9f7fcb5cc287f438e494280
+    Hash: b675cd7ae7db3d7ffef82a5040323f0f
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -30,5 +30,6 @@ ClassTypes:
   Script: {instanceID: 0}
 SerializeReferenceClassIdentifiers: []
 Assets:
-- Assets/Scripts/Examples/ResourceMgr/Resources/Cube.prefab
+- Assets/Resources/Cube.prefab
+- Assets/GameAssetsBundle/prefabs/Cube.prefab
 Dependencies: []

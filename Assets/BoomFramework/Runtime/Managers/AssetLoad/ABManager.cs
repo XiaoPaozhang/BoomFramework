@@ -22,10 +22,8 @@ namespace BoomFramework
             // 设置AssetBundle根路径
             _assetBundleRootPath = Application.streamingAssetsPath;
 
-            // 加载AssetBundle清单文件
+            // 加载AssetBundle清单文件  
             LoadManifest();
-
-            Debug.Log($"ABManager 初始化完成，AssetBundle路径: {_assetBundleRootPath}");
         }
 
         /// <summary>
@@ -35,7 +33,7 @@ namespace BoomFramework
         {
             try
             {
-                string manifestPath = Path.Combine(_assetBundleRootPath, "AssetBundles");
+                string manifestPath = Path.Combine(_assetBundleRootPath, "StandaloneWindows");
                 if (File.Exists(manifestPath))
                 {
                     AssetBundle manifestBundle = AssetBundle.LoadFromFile(manifestPath);
@@ -43,7 +41,6 @@ namespace BoomFramework
                     {
                         _manifest = manifestBundle.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
                         manifestBundle.Unload(false);
-                        Debug.Log("AssetBundle清单加载成功");
                     }
                     else
                     {
@@ -87,12 +84,11 @@ namespace BoomFramework
                     return null;
                 }
 
-                // 从AssetBundle加载资源
-                T asset = bundle.LoadAsset<T>(assetName);
+                // 从AssetBundle加载资源（支持自动添加扩展名）
+                T asset = LoadAssetFromBundle<T>(bundle, assetName);
                 if (asset != null)
                 {
                     _assetCache[path] = asset;
-                    Debug.Log($"AssetBundle同步加载成功: {path}");
                 }
                 else
                 {
@@ -153,18 +149,13 @@ namespace BoomFramework
                 yield break;
             }
 
-            // 协程从AssetBundle加载资源
-            AssetBundleRequest request = bundle.LoadAssetAsync<T>(assetName);
-            if (request == null)
+            // 协程从AssetBundle加载资源（支持自动添加扩展名）
+            T asset = null;
+            yield return LoadAssetFromBundleCoroutine<T>(bundle, assetName, (loadedAsset) =>
             {
-                Debug.LogError($"创建AssetBundleRequest失败: {assetName}");
-                callback?.Invoke(null);
-                yield break;
-            }
+                asset = loadedAsset;
+            });
 
-            yield return request;
-
-            T asset = request.asset as T;
             if (asset != null)
             {
                 _assetCache[path] = asset;
@@ -258,7 +249,6 @@ namespace BoomFramework
                 if (bundle != null)
                 {
                     _loadedAssetBundles[bundleName] = bundle;
-                    Debug.Log($"AssetBundle加载成功: {bundleName}");
                 }
                 else
                 {
@@ -288,6 +278,112 @@ namespace BoomFramework
                     LoadAssetBundle(dependency);
                 }
             }
+        }
+
+        /// <summary>
+        /// 从 AssetBundle 加载资源，支持自动添加扩展名（同步）
+        /// </summary>
+        private T LoadAssetFromBundle<T>(AssetBundle bundle, string assetName) where T : Object
+        {
+            // 如果已经有扩展名，直接加载
+            if (HasExtension(assetName))
+            {
+                return bundle.LoadAsset<T>(assetName);
+            }
+
+            // 没有扩展名，尝试根据类型添加候选扩展名
+            var candidates = GetCandidateExtensionsForType<T>();
+            if (candidates.Length == 0)
+            {
+                // 没有候选扩展名，直接尝试加载
+                return bundle.LoadAsset<T>(assetName);
+            }
+
+            // 尝试每个候选扩展名
+            foreach (var ext in candidates)
+            {
+                var candidateName = assetName + ext;
+                var asset = bundle.LoadAsset<T>(candidateName);
+                if (asset != null)
+                {
+                    return asset;
+                }
+            }
+
+            // 所有候选扩展名都失败，最后尝试不带扩展名
+            return bundle.LoadAsset<T>(assetName);
+        }
+
+        /// <summary>
+        /// 从 AssetBundle 加载资源，支持自动添加扩展名（异步）
+        /// </summary>
+        private IEnumerator LoadAssetFromBundleCoroutine<T>(AssetBundle bundle, string assetName, Action<T> callback) where T : Object
+        {
+            // 如果已经有扩展名，直接加载
+            if (HasExtension(assetName))
+            {
+                AssetBundleRequest request = bundle.LoadAssetAsync<T>(assetName);
+                yield return request;
+                callback?.Invoke(request.asset as T);
+                yield break;
+            }
+
+            // 没有扩展名，尝试根据类型添加候选扩展名
+            var candidates = GetCandidateExtensionsForType<T>();
+            if (candidates.Length == 0)
+            {
+                // 没有候选扩展名，直接尝试加载
+                AssetBundleRequest request = bundle.LoadAssetAsync<T>(assetName);
+                yield return request;
+                callback?.Invoke(request.asset as T);
+                yield break;
+            }
+
+            // 尝试每个候选扩展名
+            foreach (var ext in candidates)
+            {
+                var candidateName = assetName + ext;
+                AssetBundleRequest request = bundle.LoadAssetAsync<T>(candidateName);
+                yield return request;
+
+                var asset = request.asset as T;
+                if (asset != null)
+                {
+                    Debug.Log($"[ABManager] 使用扩展名 {ext} 异步加载成功: {candidateName}");
+                    callback?.Invoke(asset);
+                    yield break;
+                }
+            }
+
+            // 所有候选扩展名都失败，最后尝试不带扩展名
+            AssetBundleRequest finalRequest = bundle.LoadAssetAsync<T>(assetName);
+            yield return finalRequest;
+            callback?.Invoke(finalRequest.asset as T);
+        }
+
+        /// <summary>
+        /// 检查路径是否包含扩展名
+        /// </summary>
+        private static bool HasExtension(string path)
+        {
+            var ext = Path.GetExtension(path);
+            return !string.IsNullOrEmpty(ext);
+        }
+
+        /// <summary>
+        /// 根据资源类型获取候选扩展名
+        /// </summary>
+        private static string[] GetCandidateExtensionsForType<T>() where T : Object
+        {
+            var t = typeof(T);
+            if (t == typeof(GameObject)) return new[] { ".prefab" };
+            if (t == typeof(Texture2D) || t == typeof(Sprite)) return new[] { ".png", ".jpg", ".jpeg", ".tga", ".psd" };
+            if (t == typeof(Material)) return new[] { ".mat" };
+            if (t == typeof(AudioClip)) return new[] { ".wav", ".mp3", ".ogg" };
+            if (t == typeof(TextAsset)) return new[] { ".txt", ".json", ".bytes", ".xml" };
+            if (t == typeof(Shader)) return new[] { ".shader" };
+            // 兜底：不做猜测
+            return Array.Empty<string>();
         }
 
         /// <summary>

@@ -268,22 +268,6 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 95781192, guid: 6152c2fd3804aff4e9321bea67e19f73, type: 3}
-      propertyPath: m_ClearFlags
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 95781192, guid: 6152c2fd3804aff4e9321bea67e19f73, type: 3}
-      propertyPath: m_TargetTexture
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 1071845905, guid: 6152c2fd3804aff4e9321bea67e19f73, type: 3}
-      propertyPath: m_Text
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 2020497922, guid: 6152c2fd3804aff4e9321bea67e19f73, type: 3}
-      propertyPath: _providerType
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 262806951932109293, guid: 6152c2fd3804aff4e9321bea67e19f73, type: 3}
       propertyPath: m_Name
       value: BoomFramework

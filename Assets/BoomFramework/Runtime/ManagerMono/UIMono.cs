@@ -9,16 +9,13 @@ namespace BoomFramework
 {
     public class UIMono : ManagerMonoBase
     {
-        [SerializeField]
-        [LabelText("编辑器资源根目录")]
-        [FolderPath(RequireExistingPath = true)]
-        [InfoBox("示例：Assets/Examples/AssetMgr/Art", InfoMessageType.Info)]
-        [OnValueChanged(nameof(NormalizeToAssetsPath))]
-        private string _uiLoadPath;
         private IAssetLoadManager _assetLoadManager;
         private IObjectPoolManager _objectPoolManager;
         private IUIManager _uiManager;
         private RectTransform _canvasRectTransform;
+        [SerializeField]
+        [InfoBox("UI预制体加载路径 (优先级低于AssetsLoadMono的UI路径配置)")]
+         private string _uiLoadPath = "Assets/GameAssetsBundle/ui";
 
         protected override void OnInit()
         {
@@ -51,7 +48,11 @@ namespace BoomFramework
                 poolParent
             );
 
-            _uiManager.Init(_uiLoadPath, uIRootContext, _assetLoadManager, _objectPoolManager);
+            // 从 AssetLoadMono 获取 UI 路径
+            var assetLoadMono = BoomFrameworkCore.Instance.GetManagerMono<AssetLoadMono>();
+            string uiLoadPath = assetLoadMono != null ? assetLoadMono.UIPath : _uiLoadPath;
+
+            _uiManager.Init(uiLoadPath, uIRootContext, _assetLoadManager, _objectPoolManager);
 
             ServiceContainer.Instance.RegisterService<IUIManager>(_uiManager);
         }
@@ -59,18 +60,6 @@ namespace BoomFramework
         protected override void OnUnInit()
         {
             base.OnUnInit();
-        }
-
-        // 规范化：保证 Inspector 中与运行时使用的路径都是以 "Assets/" 开头
-        private void NormalizeToAssetsPath()
-        {
-            if (string.IsNullOrWhiteSpace(_uiLoadPath)) return;
-            var p = _uiLoadPath.Replace('\\', '/').Trim();
-            if (!p.StartsWith("Assets/", StringComparison.Ordinal) && !p.Equals("Assets", StringComparison.Ordinal))
-            {
-                p = "Assets/" + p.TrimStart('/');
-            }
-            _uiLoadPath = p;
         }
     }
 

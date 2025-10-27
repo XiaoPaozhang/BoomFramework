@@ -96,8 +96,9 @@ namespace BoomFramework
                 return;
             }
 
-            // ui资源加载失败
-            GameObject uiPrefabs = _assetLoadManager.LoadAsset<GameObject>(Path.Combine(_uiLoadPath, uiName));
+            // 加载ui资源（统一使用正斜杠）
+            string uiPath = Path.Combine(_uiLoadPath, uiName).Replace('\\', '/');
+            GameObject uiPrefabs = _assetLoadManager.LoadAsset<GameObject>(uiPath);
             if (uiPrefabs == null)
                 return;
 

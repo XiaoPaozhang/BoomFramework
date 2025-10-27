@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace BoomFramework
@@ -30,11 +29,11 @@ namespace BoomFramework
                 .FirstOrDefault(t => t.AssemblyQualifiedName == typeName);
         }
 
-        // 获取所有实现接口T的非抽象类型的 ValueDropdownItem（用于 Odin Inspector）
-        public static IEnumerable<ValueDropdownItem<string>> GetAllTypeDropdownItems<T>(bool isFullName = false) where T : class
+        // 获取所有实现接口T的非抽象类型的名称列表
+        public static IEnumerable<string> GetAllTypeNames<T>(bool isFullName = false) where T : class
         {
             return GetAllTypes<T>()
-                    .Select(t => new ValueDropdownItem<string>(isFullName ? t.FullName : t.Name, t.AssemblyQualifiedName));
+                    .Select(t => isFullName ? t.FullName : t.Name);
         }
     }
 }

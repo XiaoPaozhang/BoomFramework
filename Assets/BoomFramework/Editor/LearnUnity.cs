@@ -4,6 +4,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine.SceneManagement;
 using System.IO;
 using System;
+using BoomFramework.EditorTools;
 
 namespace XpzUtility
 {
@@ -12,11 +13,10 @@ namespace XpzUtility
         private const string PrefsKey = "XpzUtility.LastSelectedFolder";
         private static string winTitle = "学习unity的模板生成";
         private string templateName;
-        // 保存相对路径，如 "Assets/..."
-        private string selectedFolderPath;
         private Vector2 scrollPosition;
+        private FolderSelector _folderSelector;
 
-        private string FormatPath => ToUnityPath(Path.Combine(selectedFolderPath, templateName));
+        private string FormatPath => ToUnityPath(Path.Combine(_folderSelector.CurrentPath, templateName));
 
         [MenuItem("BoomFramework/学习unity的模板生成 %#_z")]
         private static void ShowWindow()
@@ -30,27 +30,21 @@ namespace XpzUtility
 
         private void OnEnable()
         {
-            // 在OnEnable中加载路径（窗口创建或脚本重编译时触发）
-
-            // 初始化时加载上次保存的路径
-            string savedPath = EditorPrefs.GetString(PrefsKey, Application.dataPath);
-            // 尝试将保存的路径转换为相对路径
-            selectedFolderPath = ConvertToRelativePath(savedPath);
+            // 初始化文件夹选择器
+            _folderSelector = new FolderSelector(
+                prefsKey: PrefsKey,
+                defaultPath: "Assets",
+                dragAreaLabel: "点击选择或拖拽文件夹到这里",
+                dragAreaHeight: 60f
+            );
         }
 
         private void OnGUI()
         {
             scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition);
 
-            // 添加拖拽区域
-            DrawDragArea();
-
-            // 目录选择区域
-            EditorGUILayout.BeginVertical(GUI.skin.box);
-            {
-                EditorGUILayout.LabelField("当前目标目录:", selectedFolderPath);
-            }
-            EditorGUILayout.EndVertical();
+            // 使用 FolderSelector 绘制文件夹选择器
+            _folderSelector.DrawGUI();
 
             templateName = EditorGUILayout.TextField("模板名称:", templateName);
 
@@ -62,11 +56,11 @@ namespace XpzUtility
                 }
             }
 
-            if (EditorGUILayout.LinkButton($"清除目录{selectedFolderPath}"))
+            if (EditorGUILayout.LinkButton($"清除目录{_folderSelector.CurrentPath}"))
             {
                 bool confirm = EditorUtility.DisplayDialog(
                     "警告",
-                    $"确定要删除{selectedFolderPath}吗？",
+                    $"确定要删除{_folderSelector.CurrentPath}吗？",
                     "确认",
                     "取消"
                 );
@@ -78,46 +72,22 @@ namespace XpzUtility
         }
 
         /// <summary>
-        /// 将绝对路径转换为相对于工程的路径（Assets/...）
-        /// </summary>
-        private static string ConvertToRelativePath(string absolutePath)
-        {
-            if (absolutePath.StartsWith(Application.dataPath))
-            {
-                return "Assets" + absolutePath.Substring(Application.dataPath.Length);
-            }
-            return absolutePath;
-        }
-
-        /// <summary>
-        /// 将相对路径转换为绝对路径，便于调用文件选择面板时定位初始目录
-        /// </summary>
-        private static string AbsolutePathFromRelative(string relativePath)
-        {
-            if (relativePath.StartsWith("Assets"))
-            {
-                return Path.Combine(Application.dataPath, relativePath.Substring("Assets".Length));
-            }
-            return relativePath;
-        }
-
-        /// <summary>
         /// 使用AssetDatabase.DeleteAsset来删除目录，确保删除meta文件等
         /// </summary>
         private void ClearDirectory()
         {
             // 使用相对路径，直接操作AssetDatabase
-            if (AssetDatabase.IsValidFolder(selectedFolderPath))
+            if (AssetDatabase.IsValidFolder(_folderSelector.CurrentPath))
             {
-                bool isDeleted = AssetDatabase.DeleteAsset(selectedFolderPath);
+                bool isDeleted = AssetDatabase.DeleteAsset(_folderSelector.CurrentPath);
                 if (isDeleted)
                 {
                     AssetDatabase.Refresh();
-                    Debug.Log($"已删除文件夹: {selectedFolderPath}");
+                    Debug.Log($"已删除文件夹: {_folderSelector.CurrentPath}");
                 }
                 else
                 {
-                    Debug.LogError($"删除文件夹失败: {selectedFolderPath}");
+                    Debug.LogError($"删除文件夹失败: {_folderSelector.CurrentPath}");
                 }
             }
             else
@@ -134,7 +104,7 @@ namespace XpzUtility
                 return false;
             }
 
-            if (!AssetDatabase.IsValidFolder(selectedFolderPath))
+            if (!AssetDatabase.IsValidFolder(_folderSelector.CurrentPath))
             {
                 EditorUtility.DisplayDialog("错误", "目标目录不存在或无效，请重新选择", "确定");
                 return false;
@@ -150,7 +120,7 @@ namespace XpzUtility
                 if (!AssetDatabase.IsValidFolder(FormatPath))
                 {
                     // 使用AssetDatabase.CreateFolder创建文件夹
-                    string parentFolder = selectedFolderPath; // 比如 "Assets/Xpznl"
+                    string parentFolder = _folderSelector.CurrentPath; // 比如 "Assets/Xpznl"
                     string newFolderName = templateName;        // 模板名称作为新文件夹名称
                     AssetDatabase.CreateFolder(parentFolder, newFolderName);
 
@@ -209,82 +179,6 @@ namespace BoomFramework
             AssetDatabase.Refresh();
         }
 
-        /// <summary>
-        /// 绘制文件夹拖拽区域
-        /// </summary>
-        private void DrawDragArea()
-        {
-            Rect dropArea = GUILayoutUtility.GetRect(0.0f, 60.0f, GUILayout.ExpandWidth(true));
-            GUI.Box(dropArea, "点击选择或拖拽文件夹到这里", EditorStyles.helpBox);
-
-            Event evt = Event.current;
-            switch (evt.type)
-            {
-                case EventType.MouseDown:
-                    if (dropArea.Contains(evt.mousePosition))
-                    {
-                        HandleDirectorySelection();
-                        evt.Use();
-                    }
-                    break;
-
-                case EventType.DragUpdated:
-                case EventType.DragPerform:
-                    if (!dropArea.Contains(evt.mousePosition))
-                        return;
-
-                    DragAndDrop.visualMode = DragAndDropVisualMode.Copy;
-
-                    if (evt.type == EventType.DragPerform)
-                    {
-                        DragAndDrop.AcceptDrag();
-                        foreach (var draggedObject in DragAndDrop.objectReferences)
-                        {
-                            string path = AssetDatabase.GetAssetPath(draggedObject);
-                            if (AssetDatabase.IsValidFolder(path))
-                            {
-                                UpdateSelectedPath(path);
-                                break;
-                            }
-                        }
-                    }
-                    evt.Use();
-                    break;
-            }
-        }
-        private void HandleDirectorySelection()
-        {
-            string newPath = "";
-            if (Selection.activeObject != null)
-            {
-                string assetPath = AssetDatabase.GetAssetPath(Selection.activeObject);
-                if (AssetDatabase.IsValidFolder(assetPath))
-                {
-                    newPath = assetPath;
-                }
-            }
-
-            if (string.IsNullOrEmpty(newPath))
-            {
-                newPath = EditorUtility.OpenFolderPanel("选择模板目录",
-                    AbsolutePathFromRelative(selectedFolderPath), "");
-            }
-
-            if (!string.IsNullOrEmpty(newPath)) UpdateSelectedPath(newPath);
-        }
-
-        private void UpdateSelectedPath(string newPath)
-        {
-            if (newPath.StartsWith(Application.dataPath) || newPath.StartsWith("Assets"))
-            {
-                selectedFolderPath = ConvertToRelativePath(newPath);
-                EditorPrefs.SetString(PrefsKey, newPath);
-            }
-            else
-            {
-                EditorUtility.DisplayDialog("错误", "请选择工程内的目录（Assets下）", "确定");
-            }
-        }
         // 窗口居中方法
         private void Center()
         {
