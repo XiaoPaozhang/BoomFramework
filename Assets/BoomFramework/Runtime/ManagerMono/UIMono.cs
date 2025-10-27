@@ -1,9 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace BoomFramework
 {
@@ -14,7 +12,7 @@ namespace BoomFramework
         private IUIManager _uiManager;
         private RectTransform _canvasRectTransform;
         [SerializeField]
-        [InfoBox("UI预制体加载路径 (优先级低于AssetsLoadMono的UI路径配置)")]
+        [Tooltip("UI预制体加载路径 (优先级低于AssetsLoadMono的UI路径配置)")]
          private string _uiLoadPath = "Assets/GameAssetsBundle/ui";
 
         protected override void OnInit()
