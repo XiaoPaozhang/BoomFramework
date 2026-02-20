@@ -57,6 +57,11 @@ namespace BoomFramework
     IFsm Stop();
 
     /// <summary>
+    /// 销毁状态机，调用所有状态的销毁回调并清理内部数据。
+    /// </summary>
+    void Destroy();
+
+    /// <summary>
     /// 更新当前状态。
     /// </summary>
     /// <param name="deltaTime">时间增量。</param>

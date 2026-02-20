@@ -32,11 +32,7 @@ namespace BoomFramework
         /// 关闭所有活跃的 UI 实例
         /// </summary>
         void CloseAll();
-        /// <summary>
-        /// 已废弃：当前未维护页面栈，Back 不生效，请改用 CloseUI<T>() 或 CloseAll()。
-        /// </summary>
-        [Obsolete("当前未维护页面栈，Back 不生效，请改用 CloseUI<T>() 或 CloseAll().", false)]
-        bool Back();
+
         void UnInit();
     }
 }

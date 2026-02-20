@@ -9,9 +9,9 @@ namespace BoomFramework
   /// </summary>
   public class FsmManager : IFsmManager
   {
+    public bool IsInit { get; private set; }
     private Dictionary<string, IFsm> fsms = new Dictionary<string, IFsm>();
     public int FsmCount => fsms.Count;
-    public bool IsInit { get; private set; }
     public void Init()
     {
       IsInit = true;
@@ -35,8 +35,9 @@ namespace BoomFramework
 
     public void RemoveFsm(string fsmName)
     {
-      if (fsms.ContainsKey(fsmName))
+      if (fsms.TryGetValue(fsmName, out var fsm))
       {
+        fsm.Destroy();
         fsms.Remove(fsmName);
       }
     }
@@ -76,9 +77,10 @@ namespace BoomFramework
     {
       foreach (var fsm in fsms.Values)
       {
-        fsm.Stop();
+        fsm.Destroy();
       }
       fsms.Clear();
+      IsInit = false;
     }
   }
 }

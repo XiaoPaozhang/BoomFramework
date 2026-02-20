@@ -14,17 +14,17 @@ namespace BoomFramework
         public bool IsInited { get; private set; }
         public void Init()
         {
-            OnInit();
-            IsInited = true;
+            IsInited = OnInit();
         }
         public void UnInit()
         {
             OnUnInit();
             IsInited = false;
         }
-        protected virtual void OnInit()
+        protected virtual bool OnInit()
         {
             Debug.Log($"[管理器初始化]: {this.GetType().Name}");
+            return true;
         }
         protected virtual void OnUnInit()
         {

@@ -20,8 +20,9 @@ namespace BoomFramework
 
         public void Init(IAssetLoadManager assetManager)
         {
-            IsInit = true;
             _assetManager = assetManager;
+            
+            IsInit = true;
         }
 
         public void CreatePool(string poolName, Transform parent, int poolSize)

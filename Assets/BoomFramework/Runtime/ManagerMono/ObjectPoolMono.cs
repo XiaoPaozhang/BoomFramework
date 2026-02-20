@@ -8,22 +8,28 @@ namespace BoomFramework
     {
         private IObjectPoolManager _objectPoolManager;
         private IAssetLoadManager _assetManager;
-        protected override void OnInit()
+        protected override bool OnInit()
         {
-            base.OnInit();
-
-            _objectPoolManager = new ObjectPoolManager();
+            if (!base.OnInit()) return false;
 
             _assetManager = ServiceContainer.Instance.GetService<IAssetLoadManager>();
-            if (_assetManager == null) Debug.Log("_assetManager空");
+            if (_assetManager == null)
+            {
+                Debug.LogError($"[{GetType().Name}]初始化失败：未找到 IAssetLoadManager，请检查 AssetLoadMono 初始化顺序");
+                return false;
+            }
 
+            _objectPoolManager = new ObjectPoolManager();
             _objectPoolManager.Init(_assetManager);
 
             ServiceContainer.Instance.RegisterService<IObjectPoolManager>(_objectPoolManager);
+            return true;
         }
 
         protected override void OnUnInit()
         {
+            _objectPoolManager?.UnInit();
+            ServiceContainer.Instance.UnRegisterService<IObjectPoolManager>();
             base.OnUnInit();
         }
     }

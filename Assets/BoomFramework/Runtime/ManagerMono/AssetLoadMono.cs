@@ -64,16 +64,22 @@ namespace BoomFramework
             }
         }
 
-        protected override void OnInit()
+        protected override bool OnInit()
         {
-            base.OnInit();
+            if (!base.OnInit()) return false;
 
             // 根据Inspector配置创建对应的资源管理器实现
             _assetLoadManager = CreateAssetLoadManager(_providerType);
+            if (_assetLoadManager == null)
+            {
+                Debug.LogError($"[{GetType().Name}]初始化失败：CreateAssetLoadManager 返回空");
+                return false;
+            }
             _assetLoadManager.Init();
 
             // 注册到服务容器
             ServiceContainer.Instance.RegisterService<IAssetLoadManager>(_assetLoadManager);
+            return true;
         }
 
         /// <summary>

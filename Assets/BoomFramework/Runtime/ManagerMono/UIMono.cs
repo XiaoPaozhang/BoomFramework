@@ -15,15 +15,26 @@ namespace BoomFramework
         [Tooltip("UI预制体加载路径 (优先级低于AssetsLoadMono的UI路径配置)")]
          private string _uiLoadPath = "Assets/GameAssetsBundle/ui";
 
-        protected override void OnInit()
+        protected override bool OnInit()
         {
-            base.OnInit();
+            if (!base.OnInit()) return false;
 
             _assetLoadManager = ServiceContainer.Instance.GetService<IAssetLoadManager>();
             _objectPoolManager = ServiceContainer.Instance.GetService<IObjectPoolManager>();
+            if (_assetLoadManager == null || _objectPoolManager == null)
+            {
+                Debug.LogError($"[{GetType().Name}]初始化失败：依赖缺失。IAssetLoadManager={_assetLoadManager != null}, IObjectPoolManager={_objectPoolManager != null}");
+                return false;
+            }
             _uiManager = new UIManager();
 
             _canvasRectTransform = transform.Find("Canvas") as RectTransform;
+            if (_canvasRectTransform == null)
+            {
+                Debug.LogError($"[{GetType().Name}]初始化失败：未找到 Canvas 子节点");
+                return false;
+            }
+            RectTransform poolParent = _canvasRectTransform.Find("UIPools") as RectTransform;
 
             // 声明UI层级节点
             Dictionary<UILayer, RectTransform> uILayersRectTransformDict = new()
@@ -34,17 +45,24 @@ namespace BoomFramework
                 { UILayer.Toast, _canvasRectTransform.Find("Toast") as RectTransform },
                 { UILayer.Blocker, _canvasRectTransform.Find("Blocker") as RectTransform }
             };
+            foreach (var kv in uILayersRectTransformDict)
+            {
+                if (kv.Value == null)
+                {
+                    Debug.LogError($"[{GetType().Name}]初始化失败：缺少 UI 层节点 {kv.Key}");
+                    return false;
+                }
+            }
 
-            // UI池对象
-            RectTransform poolParent = _canvasRectTransform.Find("UIPools") as RectTransform;
 
-            UIRootContext uIRootContext = new(
-                transform as RectTransform,
-                _canvasRectTransform,
-                GetComponent<Camera>(),
-                uILayersRectTransformDict,
-                poolParent
-            );
+            UIRootContext uIRootContext = new()
+            {
+                UIRoot = transform as RectTransform,
+                CanvasRectTransform = _canvasRectTransform,
+                UICamera = GetComponent<Camera>(),
+                UILayersRectTransformDict = uILayersRectTransformDict,
+                PoolParent = poolParent
+            };
 
             // 从 AssetLoadMono 获取 UI 路径
             var assetLoadMono = BoomFrameworkCore.Instance.GetManagerMono<AssetLoadMono>();
@@ -53,15 +71,18 @@ namespace BoomFramework
             _uiManager.Init(uiLoadPath, uIRootContext, _assetLoadManager, _objectPoolManager);
 
             ServiceContainer.Instance.RegisterService<IUIManager>(_uiManager);
+            return true;
         }
 
         protected override void OnUnInit()
         {
+            _uiManager?.UnInit();
+            ServiceContainer.Instance.UnRegisterService<IUIManager>();
             base.OnUnInit();
         }
     }
 
-    public class UIRootContext
+    public struct UIRootContext
     {
         /// <summary>
         /// UI根节点
@@ -75,26 +96,13 @@ namespace BoomFramework
         /// UI相机
         /// </summary>
         public Camera UICamera;
-
-        public Dictionary<UILayer, RectTransform> UILayersRectTransformDict = new();
+        /// <summary>
+        /// UI层级节点字典
+        /// </summary>
+        public Dictionary<UILayer, RectTransform> UILayersRectTransformDict;
         /// <summary>
         /// 对象池空闲对象的停放父节点
         /// </summary>
         public RectTransform PoolParent;
-
-        public UIRootContext(
-            RectTransform uiRoot,
-            RectTransform canvasRectTransform,
-            Camera uICamera,
-            Dictionary<UILayer, RectTransform> uILayersRectTransformDict,
-            RectTransform poolParent
-        )
-        {
-            UIRoot = uiRoot;
-            CanvasRectTransform = canvasRectTransform;
-            UICamera = uICamera;
-            UILayersRectTransformDict = uILayersRectTransformDict;
-            PoolParent = poolParent;
-        }
     }
 }

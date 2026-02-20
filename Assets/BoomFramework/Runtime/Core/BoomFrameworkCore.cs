@@ -64,9 +64,10 @@ namespace BoomFramework
                 if (managerMono.Value != null && managerMono.Value.IsInited)
                 {
                     managerMono.Value.UnInit();
-                }else
+                }
+                else
                 {
-                    Debug.LogError($"{managerMono.Key}注销失败,原因: 未初始化");
+                    Debug.LogWarning($"{managerMono.Key}跳过注销：未初始化或实例为空");
                 }
             }
         }

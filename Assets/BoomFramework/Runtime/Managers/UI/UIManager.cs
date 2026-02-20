@@ -18,10 +18,10 @@ namespace BoomFramework
         private IObjectPoolManager _objectPoolManager;
         // 注册表：uiKey -> 元数据
         private readonly Dictionary<string, UiMetadata> _uiRegistry = new();
+        // 类型索引：uiType -> uiKey（用于支持自定义 uiName）
+        private readonly Dictionary<Type, string> _uiTypeToKey = new();
         // 活跃实例：uiKey -> 单实例（不允许同类多开）
         private readonly Dictionary<string, UIBase> _activeInstanceByKey = new();
-        // Page 路由栈
-        private readonly Stack<UIBase> _pageStack = new();
 
         public bool IsInit { get; private set; }
 
@@ -82,13 +82,29 @@ namespace BoomFramework
         private sealed class UiMetadata
         {
             public string UiName;
+            public Type UiType;
             public UILayer DefaultLayer;
             public string LoadPath;
+        }
+
+        private bool TryGetUiKey<T>(out string uiKey) where T : UIBase
+        {
+            if (_uiTypeToKey.TryGetValue(typeof(T), out uiKey))
+            {
+                return true;
+            }
+            uiKey = typeof(T).Name;
+            return _uiRegistry.ContainsKey(uiKey);
         }
 
         public void RegisterUI<T>(string uiName = null, UILayer uILayer = UILayer.Page) where T : UIBase
         {
             uiName ??= typeof(T).Name;
+            if (_uiTypeToKey.TryGetValue(typeof(T), out var existedKey))
+            {
+                Debug.LogError($"[{GetType().Name}]UI 类型 {typeof(T).Name} 已注册，key={existedKey}");
+                return;
+            }
             // ui已注册
             if (_uiRegistry.ContainsKey(uiName))
             {
@@ -117,9 +133,11 @@ namespace BoomFramework
             _uiRegistry.Add(uiName, new UiMetadata
             {
                 UiName = uiName,
+                UiType = typeof(T),
                 DefaultLayer = uILayer,
                 LoadPath = Path.Combine(_uiLoadPath, uiName)
             });
+            _uiTypeToKey[typeof(T)] = uiName;
 
             _activeInstanceByKey.Remove(uiName);
             Debug.Log($"[{GetType().Name}]注册UI {uiName}，层：{uILayer}");
@@ -127,10 +145,9 @@ namespace BoomFramework
 
         public T GetUI<T>() where T : UIBase
         {
-            var uiName = typeof(T).Name;
-            if (!_uiRegistry.ContainsKey(uiName))
+            if (!TryGetUiKey<T>(out var uiName))
             {
-                Debug.LogError($"[{GetType().Name}]UI {uiName} 未注册");
+                Debug.LogError($"[{GetType().Name}]UI {typeof(T).Name} 未注册");
                 return null;
             }
             if (_activeInstanceByKey.TryGetValue(uiName, out var inst))
@@ -142,10 +159,9 @@ namespace BoomFramework
 
         public T OpenUI<T>(object arg = null) where T : UIBase
         {
-            var uiName = typeof(T).Name;
-            if (!_uiRegistry.TryGetValue(uiName, out var meta))
+            if (!TryGetUiKey<T>(out var uiName) || !_uiRegistry.TryGetValue(uiName, out var meta))
             {
-                Debug.LogError($"[{GetType().Name}]UI {uiName} 未注册");
+                Debug.LogError($"[{GetType().Name}]UI {typeof(T).Name} 未注册");
                 return null;
             }
 
@@ -158,61 +174,6 @@ namespace BoomFramework
             // 使用实例上的脚本
             var parent = UILayersRectTransformDict[meta.DefaultLayer];
             GameObject go = _objectPoolManager.GetObject(uiName, parent);
-            var uiRectTransform = go.transform as RectTransform;
-
-            #region 根据层级做归一化：Page 全屏拉伸；其余层仅规范变换，不改布局锚点
-            if (meta.DefaultLayer == UILayer.Page)
-            {
-                // 全屏拉伸
-                if (uiRectTransform.anchorMin != Vector2.zero || uiRectTransform.anchorMax != Vector2.one)
-                {
-                    uiRectTransform.anchorMin = Vector2.zero;
-                    uiRectTransform.anchorMax = Vector2.one;
-                    Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的anchorMin或anchorMax不是0或1，{GetType().Name}已为您修改为0,1,请注意检查");
-                }
-                // 贴边
-                if (uiRectTransform.offsetMin != Vector2.zero)
-                {
-                    uiRectTransform.offsetMin = Vector2.zero;
-                    Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的offsetMin不是0，{GetType().Name}已为您修改为0,请注意检查");
-                }
-                if (uiRectTransform.offsetMax != Vector2.zero)
-                {
-                    uiRectTransform.offsetMax = Vector2.zero;
-                    Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的offsetMax不是0，{GetType().Name}已为您修改为0,请注意检查");
-                }
-                // 居中轴心（常见页模板）
-                if (uiRectTransform.pivot != new Vector2(0.5f, 0.5f))
-                {
-                    uiRectTransform.pivot = new Vector2(0.5f, 0.5f);
-                    Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的pivot不是0.5,0.5，{GetType().Name}已为您修改为0.5,0.5,请注意检查");
-                }
-                // 对齐父节点
-                if (uiRectTransform.anchoredPosition != Vector2.zero)
-                {
-                    uiRectTransform.anchoredPosition = Vector2.zero;
-                    Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的anchoredPosition不是0，{GetType().Name}已为您修改为0,请注意检查");
-                }
-            }
-
-            // 统一规范变换（避免 prefab root 被随意改动）
-            if (uiRectTransform.localScale != Vector3.one)
-            {
-                uiRectTransform.localScale = Vector3.one;
-                Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的localScale不是1，{GetType().Name}已为您修改为1,请注意检查");
-            }
-            if (uiRectTransform.localRotation != Quaternion.identity)
-            {
-                uiRectTransform.localRotation = Quaternion.identity;
-                Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的localRotation不是0，{GetType().Name}已为您修改为0,请注意检查");
-            }
-            if (uiRectTransform.localPosition.z != 0f)
-            {
-                var lp = uiRectTransform.localPosition;
-                uiRectTransform.localPosition = new Vector3(lp.x, lp.y, 0f);
-                Debug.LogWarning($"[{GetType().Name}]UI {uiName} 的localPosition.z不是0，{GetType().Name}已为您修改为0,请注意检查");
-            }
-            #endregion
 
             // 设置到顶层
             go.transform.SetAsLastSibling();
@@ -229,7 +190,11 @@ namespace BoomFramework
 
         public void CloseUI<T>() where T : UIBase
         {
-            var uiName = typeof(T).Name;
+            if (!TryGetUiKey<T>(out var uiName))
+            {
+                Debug.LogError($"[{GetType().Name}]关闭UI<{typeof(T).Name}>失败,该UI未注册");
+                return;
+            }
             if (!_activeInstanceByKey.TryGetValue(uiName, out var instance))
             {
                 Debug.LogError($"[{GetType().Name}]关闭UI<{typeof(T).Name}>失败,该UI未打开");
@@ -243,48 +208,16 @@ namespace BoomFramework
             _activeInstanceByKey.Remove(uiName);
         }
 
-        /// <summary>
-        /// 关闭 Page 栈顶页面
-        /// - 若栈为空或仅有一个页面（根页），则不执行关闭并返回 false
-        /// - 否则关闭栈顶页面并弹栈，返回 true
-        /// </summary>
-        [Obsolete("暂时废弃请使用CloseUI<T>代替")]
-        public bool Back()
-        {
-            // 若没有页面或仅剩根页，则不允许返回
-            if (_pageStack.Count <= 0)
-            {
-                Debug.LogError($"[{GetType().Name}]Back失败,栈中无可返回页面");
-                return false;
-            }
-
-            var topUI = _pageStack.Peek();
-            var uiName = topUI.GetType().Name;
-
-            // 业务关闭
-            topUI.OnClose();
-
-            // 回收对象并维护活跃表
-            _objectPoolManager.RecycleObject(topUI.gameObject);
-            _activeInstanceByKey.Remove(uiName);
-
-            // 弹栈
-            if (_pageStack.Count > 0 && ReferenceEquals(_pageStack.Peek(), topUI))
-            {
-                _pageStack.Pop();
-            }
-
-            return _pageStack.Count > 0;
-        }
-
         public void CloseAll()
         {
             // 关闭所有活跃实例（不区分层）
             if (_activeInstanceByKey.Count == 0) return;
             // 创建拷贝以避免枚举时修改字典
-            var list = new List<UIBase>(_activeInstanceByKey.Values);
-            foreach (var inst in list)
+            var list = new List<KeyValuePair<string, UIBase>>(_activeInstanceByKey);
+            foreach (var kv in list)
             {
+                var uiKey = kv.Key;
+                var inst = kv.Value;
                 try
                 {
                     inst.OnClose();
@@ -296,16 +229,16 @@ namespace BoomFramework
                 finally
                 {
                     _objectPoolManager.RecycleObject(inst.gameObject);
-                    _activeInstanceByKey.Remove(inst.GetType().Name);
+                    _activeInstanceByKey.Remove(uiKey);
                 }
             }
-
-            // 清空 Page 栈
-            _pageStack.Clear();
         }
 
         public void UnInit()
         {
+            CloseAll();
+            _uiTypeToKey.Clear();
+            _uiRegistry.Clear();
             IsInit = false;
         }
     }

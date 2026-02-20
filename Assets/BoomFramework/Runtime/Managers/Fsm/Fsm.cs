@@ -90,6 +90,17 @@ namespace BoomFramework
             return this;
         }
 
+        public void Destroy()
+        {
+            // 先确保当前状态退出，再统一触发所有状态的销毁回调
+            Stop();
+            foreach (var state in _states.Values)
+            {
+                state.OnDestroyed();
+            }
+            _states.Clear();
+        }
+
         public void Update(float deltaTime)
         {
             if (CurrentState == null) return;
