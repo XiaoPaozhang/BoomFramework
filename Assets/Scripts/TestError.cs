@@ -12,7 +12,7 @@ public class TestError : MonoBehaviour
     void Start()
     {
         // 故意使用 Editor API 且不加 #if UNITY_EDITOR 包裹
-        // Selection.activeGameObject = this.gameObject;
+        Selection.activeGameObject = this.gameObject;
     }
 
     // Update is called once per frame
