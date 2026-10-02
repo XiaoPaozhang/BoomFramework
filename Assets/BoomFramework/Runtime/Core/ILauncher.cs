@@ -10,6 +10,6 @@ namespace BoomFramework
     public interface ILauncher
     {
         /// <summary>启动项目</summary>
-        void Launch();
+        IEnumerator Launch();
     }
 }

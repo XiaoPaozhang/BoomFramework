@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -12,8 +13,9 @@ namespace BoomFramework.EditorTools
     [CustomEditor(typeof(BoomFrameworkCore))]
     public class BoomFrameworkCoreEditor : Editor
     {
-        private SerializedProperty _isShowFullNameProp;
+        private BoomFrameworkCore _target;
         private SerializedProperty _selectedLauncherTypeNameProp;
+        private SerializedProperty _launcher1Prop;
 
         private List<Type> _launcherTypes;
         private string[] _launcherDisplayNames;
@@ -21,9 +23,10 @@ namespace BoomFramework.EditorTools
 
         private void OnEnable()
         {
+            _target = (BoomFrameworkCore)target;
             // 获取序列化属性
-            _isShowFullNameProp = serializedObject.FindProperty("_isShowFullName");
             _selectedLauncherTypeNameProp = serializedObject.FindProperty("_selectedLauncherTypeName");
+            _launcher1Prop = serializedObject.FindProperty("_launcher");
 
             // 刷新启动器列表
             RefreshLauncherList();
@@ -42,7 +45,6 @@ namespace BoomFramework.EditorTools
             // 绘制"显示完整名称"开关
             EditorGUI.BeginChangeCheck();
             {
-                EditorGUILayout.PropertyField(_isShowFullNameProp, new GUIContent("显示完整类型名"));
                 if (EditorGUI.EndChangeCheck())
                 {
                     serializedObject.ApplyModifiedProperties();
@@ -73,8 +75,17 @@ namespace BoomFramework.EditorTools
                     // 更新选中的启动器类型名
                     if (_selectedIndex >= 0 && _selectedIndex < _launcherTypes.Count)
                     {
-                        _selectedLauncherTypeNameProp.stringValue = _launcherTypes[_selectedIndex].AssemblyQualifiedName;
+                        var launcherType = _launcherTypes[_selectedIndex];
+
+                        _selectedLauncherTypeNameProp.stringValue = launcherType.AssemblyQualifiedName;
                         serializedObject.ApplyModifiedProperties();
+
+                        foreach (var _launcher in _target.GetComponents<ILauncher>())
+                        {
+                            GameObject.DestroyImmediate(_launcher as MonoBehaviour);
+                        }
+                        var launcherInstance = _target.gameObject.AddComponent(launcherType);
+                        _launcher1Prop.objectReferenceValue = launcherInstance as MonoBehaviour;
                     }
                 }
 
@@ -102,9 +113,8 @@ namespace BoomFramework.EditorTools
             _launcherTypes = ReflectionUtility.GetAllTypes<ILauncher>().ToList();
 
             // 生成显示名称
-            bool showFullName = _isShowFullNameProp?.boolValue ?? false;
             _launcherDisplayNames = _launcherTypes
-                .Select(t => showFullName ? t.FullName : t.Name)
+                .Select(t => t.Name)
                 .ToArray();
 
             // 查找当前选中的索引

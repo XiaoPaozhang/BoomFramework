@@ -4,11 +4,11 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public class TestILauncher : ILauncher
+    public class TestILauncher : LauncherBase
     {
-        public void Launch()
+        public override IEnumerator Launch()
         {
-            
+            yield return null;
         }
     }
 }

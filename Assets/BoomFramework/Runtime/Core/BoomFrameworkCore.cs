@@ -16,6 +16,19 @@ namespace BoomFramework
     [HelpURL("https://github.com/XiaoPaozhang/BoomFramework")]
     public partial class BoomFrameworkCore : MonoSingleton<BoomFrameworkCore>
     {
+        #region Inspector 属性,供 Editor 使用，参见 BoomFrameworkCoreEditor.cs
+
+        [Tooltip("选中的启动器类型全名（AssemblyQualifiedName）")]
+        [SerializeField]
+        private string _selectedLauncherTypeName = string.Empty;
+
+        [Tooltip("选中的启动器类型全名（AssemblyQualifiedName）")]
+        [SerializeField]
+        private MonoBehaviour _launcher;
+
+        #endregion
+
+
         private const string FrameWorkName = "BoomFramework";
         private GameObject _frameWorkRoot;
         private Transform _frameWorkRootTransform;
@@ -34,7 +47,6 @@ namespace BoomFramework
             _frameWorkRoot.name = FrameWorkName;
             InitMgrMono();
             RegisterService();
-            InitStaticAPI();
             LaunchGame();
         }
 
@@ -47,15 +59,8 @@ namespace BoomFramework
                 managerMono.Init();
                 _managerMonosByTypeName.Add(managerMono.GetType().Name, managerMono);
             }
-            
-        }
-        
-        // 初始化静态门户API
-        private void InitStaticAPI()
-        {
-            BoomEvent.Init(_serviceLocator.GetService<IEventManager>());
-        }
 
+        }
 
         private void UnInitMgrMono()
         {
@@ -87,14 +92,14 @@ namespace BoomFramework
         {
             if (string.IsNullOrEmpty(_selectedLauncherTypeName))
             {
-                Debug.LogWarning($"[{GetType().Name}]未选择启动器，清关闭游戏检查框架预制体");
+                Debug.LogWarning($"[{GetType().Name}]未选择启动器，点我查看框架预制体Launcher", this);
                 return;
             }
 
             var launcherType = Type.GetType(_selectedLauncherTypeName);
             if (launcherType == null)
             {
-                Debug.LogError($"[{GetType().Name}]无法找到启动器类型: {_selectedLauncherTypeName}");
+                Debug.LogError($"[{GetType().Name}]无法找到启动器类型: {_selectedLauncherTypeName}，点我查看框架预制体Launcher", this);
                 return;
             }
 
@@ -106,9 +111,8 @@ namespace BoomFramework
 
             try
             {
-                var launcher = Activator.CreateInstance(launcherType) as ILauncher;
                 Debug.Log($"[启动游戏]: 启动器名称: {launcherType.Name}");
-                launcher.Launch();
+                (_launcher as ILauncher).Launch();
             }
             catch (Exception ex)
             {

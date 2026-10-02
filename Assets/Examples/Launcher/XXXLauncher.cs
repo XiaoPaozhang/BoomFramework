@@ -5,11 +5,12 @@ using UnityEngine;
 
 namespace BoomFramework
 {
-    public class XXXLauncher : ILauncher
+    public class XXXLauncher : LauncherBase
     {
-        public void Launch()
+        public override IEnumerator Launch()
         {
             Debug.Log($"{this.GetType().Name} 启动");
+            yield return null;
         }
     }
 }
