@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEditor;
 using UnityEngine;
 
@@ -14,19 +13,16 @@ namespace BoomFramework.EditorTools
     public class BoomFrameworkCoreEditor : Editor
     {
         private BoomFrameworkCore _target;
-        private SerializedProperty _selectedLauncherTypeNameProp;
-        private SerializedProperty _launcher1Prop;
+        private SerializedProperty _launcherProp;
 
         private List<Type> _launcherTypes;
         private string[] _launcherDisplayNames;
-        private int _selectedIndex = 0;
 
         private void OnEnable()
         {
             _target = (BoomFrameworkCore)target;
             // 获取序列化属性
-            _selectedLauncherTypeNameProp = serializedObject.FindProperty("_selectedLauncherTypeName");
-            _launcher1Prop = serializedObject.FindProperty("_launcher");
+            _launcherProp = serializedObject.FindProperty("_launcher");
 
             // 刷新启动器列表
             RefreshLauncherList();
@@ -37,70 +33,72 @@ namespace BoomFramework.EditorTools
             serializedObject.Update();
 
             // 绘制默认的 Inspector（除了我们自定义的字段）
-            DrawPropertiesExcluding(serializedObject, "_isShowFullName", "_selectedLauncherTypeName");
+            DrawPropertiesExcluding(serializedObject, "_launcher");
 
             EditorGUILayout.Space(10);
             EditorGUILayout.LabelField("启动器配置", EditorStyles.boldLabel);
 
-            // 绘制"显示完整名称"开关
-            EditorGUI.BeginChangeCheck();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.PrefixLabel("启动器列表");
+            if (GUILayout.Button("刷新", GUILayout.Width(60)))
             {
-                if (EditorGUI.EndChangeCheck())
-                {
-                    serializedObject.ApplyModifiedProperties();
-                    RefreshLauncherList(); // 重新生成显示名称
-                }
-
-                // 绘制刷新按钮
-                EditorGUILayout.BeginHorizontal();
-                EditorGUILayout.PrefixLabel("启动器列表");
-                if (GUILayout.Button("刷新", GUILayout.Width(60)))
-                {
-                    RefreshLauncherList();
-                }
+                RefreshLauncherList();
             }
             EditorGUILayout.EndHorizontal();
 
-            // 绘制启动器下拉框
-            if (_launcherTypes == null || _launcherTypes.Count == 0)
+            if (_launcherTypes.Count == 0)
             {
-                EditorGUILayout.HelpBox("未找到任何实现 ILauncher 接口的类。\n请创建一个实现 ILauncher 接口的类。", MessageType.Warning);
+                EditorGUILayout.HelpBox("未找到可用的启动器。\n请创建一个继承 LauncherBase 的非抽象类。", MessageType.Warning);
+            }
+
+            // 下拉选项由实际组件引用推导，不再保存独立的类型名或选择索引。
+            var launcher = _launcherProp.objectReferenceValue as LauncherBase;
+            int selectedIndex = launcher != null
+                ? _launcherTypes.IndexOf(launcher.GetType()) + 1
+                : 0;
+            EditorGUI.BeginChangeCheck();
+            int newIndex = EditorGUILayout.Popup("选择启动器", selectedIndex, _launcherDisplayNames);
+            if (EditorGUI.EndChangeCheck())
+            {
+                SwitchLauncher(newIndex == 0 ? null : _launcherTypes[newIndex - 1]);
+                launcher = _launcherProp.objectReferenceValue as LauncherBase;
+            }
+
+            using (new EditorGUI.DisabledScope(true))
+            {
+                EditorGUILayout.PropertyField(_launcherProp, new GUIContent("启动器组件"));
+            }
+
+            if (launcher != null)
+            {
+                var launcherType = launcher.GetType();
+                EditorGUILayout.HelpBox(
+                    $"类型: {launcherType.FullName}\n" +
+                    $"程序集: {launcherType.Assembly.GetName().Name}",
+                    MessageType.Info
+                );
             }
             else
             {
-                EditorGUI.BeginChangeCheck();
-                _selectedIndex = EditorGUILayout.Popup("选择启动器", _selectedIndex, _launcherDisplayNames);
-                if (EditorGUI.EndChangeCheck())
-                {
-                    // 更新选中的启动器类型名
-                    if (_selectedIndex >= 0 && _selectedIndex < _launcherTypes.Count)
-                    {
-                        var launcherType = _launcherTypes[_selectedIndex];
-
-                        _selectedLauncherTypeNameProp.stringValue = launcherType.AssemblyQualifiedName;
-                        serializedObject.ApplyModifiedProperties();
-
-                        foreach (var _launcher in _target.GetComponents<ILauncher>())
-                        {
-                            GameObject.DestroyImmediate(_launcher as MonoBehaviour);
-                        }
-                        var launcherInstance = _target.gameObject.AddComponent(launcherType);
-                        _launcher1Prop.objectReferenceValue = launcherInstance as MonoBehaviour;
-                    }
-                }
-
-                // 显示当前选中的启动器信息
-                if (_selectedIndex >= 0 && _selectedIndex < _launcherTypes.Count)
-                {
-                    var selectedType = _launcherTypes[_selectedIndex];
-                    EditorGUILayout.HelpBox(
-                        $"类型: {selectedType.FullName}\n" +
-                        $"程序集: {selectedType.Assembly.GetName().Name}",
-                        MessageType.Info
-                    );
-                }
+                EditorGUILayout.HelpBox("尚未配置启动器，请从下拉列表选择。", MessageType.Warning);
             }
 
+            serializedObject.ApplyModifiedProperties();
+        }
+
+        private void SwitchLauncher(Type launcherType)
+        {
+            serializedObject.ApplyModifiedProperties();
+            foreach (var launcher in _target.GetComponents<LauncherBase>())
+            {
+                DestroyImmediate(launcher);
+            }
+
+            var launcherInstance = launcherType != null
+                ? _target.gameObject.AddComponent(launcherType) as LauncherBase
+                : null;
+            serializedObject.Update();
+            _launcherProp.objectReferenceValue = launcherInstance;
             serializedObject.ApplyModifiedProperties();
         }
 
@@ -109,35 +107,17 @@ namespace BoomFramework.EditorTools
         /// </summary>
         private void RefreshLauncherList()
         {
-            // 使用反射获取所有实现 ILauncher 接口的类型
-            _launcherTypes = ReflectionUtility.GetAllTypes<ILauncher>().ToList();
+            // 只列出可挂载的 LauncherBase 派生组件。
+            _launcherTypes = ReflectionUtility.GetAllTypes<LauncherBase>()
+                .Where(t => !t.ContainsGenericParameters)
+                .OrderBy(t => t.FullName, StringComparer.Ordinal)
+                .ToList();
 
             // 生成显示名称
             _launcherDisplayNames = _launcherTypes
                 .Select(t => t.Name)
+                .Prepend("未选择")
                 .ToArray();
-
-            // 查找当前选中的索引
-            string currentTypeName = _selectedLauncherTypeNameProp?.stringValue;
-            if (!string.IsNullOrEmpty(currentTypeName))
-            {
-                _selectedIndex = _launcherTypes.FindIndex(t => t.AssemblyQualifiedName == currentTypeName);
-                if (_selectedIndex < 0)
-                {
-                    _selectedIndex = 0;
-                }
-            }
-            else
-            {
-                _selectedIndex = 0;
-            }
-
-            // 如果有启动器但没有选中任何一个，默认选中第一个
-            if (_launcherTypes.Count > 0 && string.IsNullOrEmpty(currentTypeName))
-            {
-                _selectedLauncherTypeNameProp.stringValue = _launcherTypes[0].AssemblyQualifiedName;
-                serializedObject.ApplyModifiedProperties();
-            }
         }
     }
 }

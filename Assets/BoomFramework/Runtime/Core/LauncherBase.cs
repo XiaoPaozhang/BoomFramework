@@ -1,5 +1,7 @@
+
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace BoomFramework
@@ -11,5 +13,10 @@ namespace BoomFramework
     {
         /// <summary>启动项目</summary>
         IEnumerator Launch();
+    }
+    
+    public abstract class LauncherBase : MonoBehaviour, ILauncher
+    {
+        public abstract IEnumerator Launch();
     }
 }

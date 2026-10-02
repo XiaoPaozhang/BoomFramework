@@ -569,9 +569,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5e675b1e5dcb794429c69e11e8cf6d5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _isShowFullName: 0
-  _selectedLauncherTypeName: BoomFramework.TestILauncher, Assembly-CSharp, Version=0.0.0.0,
-    Culture=neutral, PublicKeyToken=null
+  _launcher: {fileID: 0}
 --- !u!1 &262806952566243340
 GameObject:
   m_ObjectHideFlags: 0

@@ -18,13 +18,9 @@ namespace BoomFramework
     {
         #region Inspector 属性,供 Editor 使用，参见 BoomFrameworkCoreEditor.cs
 
-        [Tooltip("选中的启动器类型全名（AssemblyQualifiedName）")]
+        [Tooltip("游戏启动器组件")]
         [SerializeField]
-        private string _selectedLauncherTypeName = string.Empty;
-
-        [Tooltip("选中的启动器类型全名（AssemblyQualifiedName）")]
-        [SerializeField]
-        private MonoBehaviour _launcher;
+        private LauncherBase _launcher;
 
         #endregion
 
@@ -90,29 +86,16 @@ namespace BoomFramework
         // 启动游戏项目
         private void LaunchGame()
         {
-            if (string.IsNullOrEmpty(_selectedLauncherTypeName))
+            if (_launcher == null)
             {
                 Debug.LogWarning($"[{GetType().Name}]未选择启动器，点我查看框架预制体Launcher", this);
                 return;
             }
 
-            var launcherType = Type.GetType(_selectedLauncherTypeName);
-            if (launcherType == null)
-            {
-                Debug.LogError($"[{GetType().Name}]无法找到启动器类型: {_selectedLauncherTypeName}，点我查看框架预制体Launcher", this);
-                return;
-            }
-
-            if (!typeof(ILauncher).IsAssignableFrom(launcherType))
-            {
-                Debug.LogError($"[{GetType().Name}]类型 {launcherType.Name} 未实现 ILauncher 接口");
-                return;
-            }
-
             try
             {
-                Debug.Log($"[启动游戏]: 启动器名称: {launcherType.Name}");
-                (_launcher as ILauncher).Launch();
+                Debug.Log($"[启动游戏]: 启动器名称: {_launcher.GetType().Name}", _launcher);
+                StartCoroutine(_launcher.Launch());
             }
             catch (Exception ex)
             {
