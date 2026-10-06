@@ -88,7 +88,7 @@ namespace BoomFramework
         {
             if (_launcher == null)
             {
-                Debug.LogWarning($"[{GetType().Name}]未选择启动器，点我查看框架预制体Launcher", this);
+                Debug.LogError($"[{GetType().Name}]未选择启动器，点我查看框架预制体Launcher", this);
                 return;
             }
 

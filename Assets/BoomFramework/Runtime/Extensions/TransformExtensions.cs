@@ -15,7 +15,7 @@ namespace BoomFramework
         /// <param name="includeSelf">是否包含自身</param>
         /// <param name="includeInactive">是否包含非激活的子节点</param>
         /// <returns>匹配的组件</returns>
-        public static T FindComponent<T>(this Transform root, string name, bool includeSelf = true, bool includeInactive = false) where T : Component
+        public static T FindComponent<T>(this Transform root, string name, bool includeSelf = true, bool includeInactive = true) where T : Component
         {
             // 队列存储所有子节点
             var q = new Queue<Transform>();

@@ -80,7 +80,7 @@ namespace BoomFramework.EditorTools
             }
             else
             {
-                EditorGUILayout.HelpBox("尚未配置启动器，请从下拉列表选择。", MessageType.Warning);
+                EditorGUILayout.HelpBox("尚未配置启动器，请从下拉列表选择。", MessageType.Error);
             }
 
             serializedObject.ApplyModifiedProperties();

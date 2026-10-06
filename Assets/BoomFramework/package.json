@@ -1,0 +1,11 @@
+{
+    "name": "com.xpzhnl.boomframework",
+    "version": "0.1.0",
+    "displayName": "BoomFramework",
+    "description": "用于小型 Unity 游戏的基础框架。",
+    "unity": "2021.3",
+    "dependencies": {
+        "com.unity.ugui": "1.0.0",
+        "com.unity.textmeshpro": "3.0.9"
+    }
+}
