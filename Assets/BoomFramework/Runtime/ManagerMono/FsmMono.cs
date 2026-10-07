@@ -9,7 +9,6 @@ namespace BoomFramework{
         private IFsmManager _fsmManager;
         protected override bool OnInit()
         {
-            if (!base.OnInit()) return false;
             _fsmManager = new FsmManager();
             _fsmManager.Init();
             ServiceContainer.Instance.RegisterService<IFsmManager>(_fsmManager);
@@ -22,9 +21,11 @@ namespace BoomFramework{
             _fsmManager.OnUpdate(Time.deltaTime);
         }
 
-        void OnDestroy()
+        protected override void OnUnInit()
         {
-            _fsmManager?.OnDesdroy();
+            _fsmManager?.UnInit();
+            ServiceContainer.Instance.UnRegisterService<IFsmManager>();
+            _fsmManager = null;
         }
     }
 }

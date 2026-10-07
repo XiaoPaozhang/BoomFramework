@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace BoomFramework
@@ -28,7 +27,7 @@ namespace BoomFramework
         private const string FrameWorkName = "BoomFramework";
         private GameObject _frameWorkRoot;
         private Transform _frameWorkRootTransform;
-        private ServiceContainer _serviceLocator;
+        private ManagerMonoBase[] _managerMonos = Array.Empty<ManagerMonoBase>();
         private Dictionary<string, ManagerMonoBase> _managerMonosByTypeName = new();
 
         public Transform FrameWorkRootTransform => _frameWorkRootTransform;
@@ -36,20 +35,20 @@ namespace BoomFramework
         public override void Awake()
         {
             base.Awake();
+            if(Instance != this) return;
+            
             _frameWorkRoot = this.gameObject;
             _frameWorkRootTransform = _frameWorkRoot.transform;
-            _serviceLocator = ServiceContainer.Instance;
 
             _frameWorkRoot.name = FrameWorkName;
             InitMgrMono();
-            RegisterService();
             LaunchGame();
         }
 
         // 通过获取子节点组件拿到所有管理器mono
         private void InitMgrMono()
         {
-            ManagerMonoBase[] _managerMonos = _frameWorkRootTransform.GetComponentsInChildren<ManagerMonoBase>();
+            _managerMonos = _frameWorkRootTransform.GetComponentsInChildren<ManagerMonoBase>();
             foreach (var managerMono in _managerMonos)
             {
                 managerMono.Init();
@@ -60,26 +59,18 @@ namespace BoomFramework
 
         private void UnInitMgrMono()
         {
-            foreach (var managerMono in _managerMonosByTypeName)
+            // 按初始化的逆序清理，依赖的服务在使用它们的模块之后销毁。
+            for (int i = _managerMonos.Length - 1; i >= 0; i--)
             {
-                if (managerMono.Value != null && managerMono.Value.IsInited)
+                var managerMono = _managerMonos[i];
+                if (managerMono != null && managerMono.IsInited)
                 {
-                    managerMono.Value.UnInit();
+                    managerMono.UnInit();
                 }
                 else
                 {
-                    Debug.LogWarning($"{managerMono.Key}跳过注销：未初始化或实例为空");
+                    Debug.LogWarning($"管理器跳过注销：未初始化或实例为空，索引 {i}");
                 }
-            }
-        }
-
-        private void RegisterService()
-        {
-            var serviceRegisters = ReflectionUtility.GetAllTypes<IServiceRegister>();
-            foreach (var serviceRegister in serviceRegisters)
-            {
-                var serviceRegisterInstance = Activator.CreateInstance(serviceRegister) as IServiceRegister;
-                serviceRegisterInstance.RegisterServices(_serviceLocator);
             }
         }
 

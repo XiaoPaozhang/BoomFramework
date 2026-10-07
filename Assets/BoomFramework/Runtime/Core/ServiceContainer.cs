@@ -20,7 +20,7 @@ namespace BoomFramework
         {
             if (HasService<T>())
             {
-                Debug.Log($"[服务注册]: {typeof(T).Name} 已注册,替换服务,新服务: {serviceInstance},旧服务: {_servicesDict[typeof(T)]}");
+                Debug.LogWarning($"[服务注册]: {typeof(T).Name} 已注册,替换服务,新服务: {serviceInstance},旧服务: {_servicesDict[typeof(T)]}");
             }
 
             _servicesDict[typeof(T)] = serviceInstance;
@@ -35,6 +35,7 @@ namespace BoomFramework
         /// <returns>是否注销成功</returns>
         public bool UnRegisterService<T>() where T : class
         {
+            Debug.Log($"[服务销毁]: {typeof(T).Name} 实例: {GetService<T>()}");
             return _servicesDict.Remove(typeof(T));
         }
 

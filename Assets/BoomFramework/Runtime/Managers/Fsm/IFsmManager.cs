@@ -61,6 +61,6 @@ namespace BoomFramework
     /// <summary>
     /// 销毁 FSM 管理器
     /// </summary>
-    void OnDesdroy();
+    void UnInit();
   }
 }

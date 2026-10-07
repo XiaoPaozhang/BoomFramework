@@ -21,14 +21,7 @@ namespace BoomFramework
             OnUnInit();
             IsInited = false;
         }
-        protected virtual bool OnInit()
-        {
-            Debug.Log($"[管理器初始化]: {this.GetType().Name}");
-            return true;
-        }
-        protected virtual void OnUnInit()
-        {
-            Debug.Log($"[管理器销毁]: {this.GetType().Name}");
-        }
+        protected abstract bool OnInit();
+        protected abstract void OnUnInit();
     }
 }

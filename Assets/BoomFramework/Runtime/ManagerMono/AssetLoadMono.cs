@@ -66,8 +66,6 @@ namespace BoomFramework
 
         protected override bool OnInit()
         {
-            if (!base.OnInit()) return false;
-
             // 根据Inspector配置创建对应的资源管理器实现
             _assetLoadManager = CreateAssetLoadManager(_providerType);
             if (_assetLoadManager == null)
@@ -119,7 +117,8 @@ namespace BoomFramework
         protected override void OnUnInit()
         {
             _assetLoadManager?.UnInit();
-            base.OnUnInit();
+            ServiceContainer.Instance.UnRegisterService<IAssetLoadManager>();
+            _assetLoadManager = null;
         }
     }
 

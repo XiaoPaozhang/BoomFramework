@@ -17,8 +17,6 @@ namespace BoomFramework
 
         protected override bool OnInit()
         {
-            if (!base.OnInit()) return false;
-
             _assetLoadManager = ServiceContainer.Instance.GetService<IAssetLoadManager>();
             _objectPoolManager = ServiceContainer.Instance.GetService<IObjectPoolManager>();
             if (_assetLoadManager == null || _objectPoolManager == null)
@@ -75,7 +73,7 @@ namespace BoomFramework
         {
             _uiManager?.UnInit();
             ServiceContainer.Instance.UnRegisterService<IUIManager>();
-            base.OnUnInit();
+            _uiManager = null;
         }
     }
 

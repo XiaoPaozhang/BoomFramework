@@ -73,7 +73,7 @@ namespace BoomFramework
       return fsms.ContainsKey(fsmName);
     }
 
-    public void OnDesdroy()
+    public void UnInit()
     {
       foreach (var fsm in fsms.Values)
       {
