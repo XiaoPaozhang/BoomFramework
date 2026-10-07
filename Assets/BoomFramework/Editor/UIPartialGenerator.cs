@@ -515,6 +515,7 @@ namespace BoomFramework.EditorTools
             if (useTMP) sb.AppendLine("using TMPro;");
             sb.AppendLine("using UnityEngine;");
             if (useUI) sb.AppendLine("using UnityEngine.UI;");
+            sb.AppendLine("using BoomFramework;");
             sb.AppendLine();
 
             if (!string.IsNullOrEmpty(@namespace))

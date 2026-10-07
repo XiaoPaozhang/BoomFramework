@@ -14,14 +14,21 @@ namespace BoomFramework
         /// 资源管理由外部提供
         /// </summary>
         private IAssetLoadManager _assetManager;
+        private Transform _poolRoot;
         private Dictionary<string, ObjectPool> _poolsDict = new();
         // 实例归属登记：字典<实例ID, 对象池名称>
         private Dictionary<int, string> _instanceToPool = new();
 
-        public void Init(IAssetLoadManager assetManager)
+        public void Init(IAssetLoadManager assetManager, Transform poolRoot)
         {
+            if (assetManager == null || poolRoot == null)
+            {
+                Debug.LogError("对象池管理器初始化失败：资源管理器或模块节点缺失");
+                return;
+            }
+
             _assetManager = assetManager;
-            
+            _poolRoot = poolRoot;
             IsInit = true;
         }
 
@@ -43,13 +50,19 @@ namespace BoomFramework
 
         public void CreatePool(string poolName, GameObject prefab, Transform parent, int poolSize)
         {
+            if (!IsInit || _poolRoot == null)
+            {
+                Debug.LogError("对象池管理器未初始化或模块节点已销毁");
+                return;
+            }
+
             if (_poolsDict.ContainsKey(poolName))
             {
                 Debug.LogError($"对象池 {poolName} 已经存在");
                 return;
             }
 
-            ObjectPool objectPool = new(poolName, prefab, poolSize, parent);
+            ObjectPool objectPool = new(poolName, prefab, poolSize, parent, _poolRoot);
             _poolsDict.Add(poolName, objectPool);
         }
 
@@ -198,6 +211,7 @@ namespace BoomFramework
             IsInit = false;
             _assetManager = null;
             ClearAllPool();
+            _poolRoot = null;
         }
     }
 }

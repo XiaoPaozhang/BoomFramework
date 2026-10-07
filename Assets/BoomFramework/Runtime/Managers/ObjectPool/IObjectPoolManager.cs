@@ -16,7 +16,7 @@ namespace BoomFramework
         /// <summary>
         /// 初始化
         /// </summary>
-        void Init(IAssetLoadManager assetManager);
+        void Init(IAssetLoadManager assetManager, Transform poolRoot);
         /// <summary>
         /// 创建对象池(默认通过资源加载管理器的方式加载资源)
         /// </summary>

@@ -20,7 +20,7 @@ namespace BoomFramework
             }
 
             _objectPoolManager = new ObjectPoolManager();
-            _objectPoolManager.Init(_assetManager);
+            _objectPoolManager.Init(_assetManager, transform);
 
             ServiceContainer.Instance.RegisterService<IObjectPoolManager>(_objectPoolManager);
             return true;

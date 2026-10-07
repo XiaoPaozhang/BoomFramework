@@ -30,6 +30,10 @@ namespace BoomFramework
         /// 空闲对象的父节点
         /// </summary>
         private Transform _parent;
+        /// <summary>
+        /// 池子回收位置
+        /// </summary>
+        private Transform _poolRoot;
 
         /// <summary>
         /// 初始数量
@@ -52,12 +56,13 @@ namespace BoomFramework
         /// </summary>
         public int PoolSize => _poolSize;
 
-        public ObjectPool(string poolName, GameObject prefab, int poolSize, Transform parent)
+        public ObjectPool(string poolName, GameObject prefab, int poolSize, Transform parent, Transform poolRoot)
         {
             _poolName = poolName;
             _poolSize = Mathf.Max(0, poolSize);
             _prefab = prefab;
             _parent = parent;
+            _poolRoot = poolRoot;
 
             for (int i = 0; i < _poolSize; i++)
             {
@@ -73,6 +78,11 @@ namespace BoomFramework
                 ? _idleObjects.Pop()
                 : GameObject.Instantiate(_prefab, _parent);
 
+            // 已回收的实例重新取出时，回到这个池创建时指定的回收位置。
+            if (obj.transform.parent != _parent)
+            {
+                obj.transform.SetParent(_parent, false);
+            }
             obj.SetActive(true);
 
             _activeObjects.Add(obj);
@@ -93,10 +103,10 @@ namespace BoomFramework
                 return;
             }
 
-            // 还原到池的父节点，确保层级容器不堆积隐藏对象
-            if (obj.transform.parent != _parent)
+            // 回收位置独立于生成位置，统一放到 ObjectPoolMono 下。
+            if (obj.transform.parent != _poolRoot)
             {
-                obj.transform.SetParent(_parent, false);
+                obj.transform.SetParent(_poolRoot, false);
             }
             obj.SetActive(false);
             _activeObjects.Remove(obj);

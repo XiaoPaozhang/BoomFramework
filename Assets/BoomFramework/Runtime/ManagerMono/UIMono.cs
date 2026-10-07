@@ -34,8 +34,6 @@ namespace BoomFramework
                 Debug.LogError($"[{GetType().Name}]初始化失败：未找到 Canvas 子节点");
                 return false;
             }
-            RectTransform poolParent = _canvasRectTransform.Find("UIPools") as RectTransform;
-
             // 声明UI层级节点
             Dictionary<UILayer, RectTransform> uILayersRectTransformDict = new()
             {
@@ -60,8 +58,7 @@ namespace BoomFramework
                 UIRoot = transform as RectTransform,
                 CanvasRectTransform = _canvasRectTransform,
                 UICamera = GetComponent<Camera>(),
-                UILayersRectTransformDict = uILayersRectTransformDict,
-                PoolParent = poolParent
+                UILayersRectTransformDict = uILayersRectTransformDict
             };
 
             // 从 AssetLoadMono 获取 UI 路径
@@ -100,9 +97,5 @@ namespace BoomFramework
         /// UI层级节点字典
         /// </summary>
         public Dictionary<UILayer, RectTransform> UILayersRectTransformDict;
-        /// <summary>
-        /// 对象池空闲对象的停放父节点
-        /// </summary>
-        public RectTransform PoolParent;
     }
 }

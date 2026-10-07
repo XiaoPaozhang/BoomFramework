@@ -125,9 +125,8 @@ namespace BoomFramework
                 return;
             }
 
-            // 创建对象池：空闲对象挂在 PoolParent，避免层里堆隐藏对象
-            var poolParent = _uIRootContext.PoolParent != null ? _uIRootContext.PoolParent : CanvasRectTransform;
-            _objectPoolManager.CreatePool(uiName, uiPrefabs, poolParent, 1);
+            // 默认在所属 UI 层生成，回收位置由对象池管理器维护。
+            _objectPoolManager.CreatePool(uiName, uiPrefabs, UILayersRectTransformDict[uILayer], 1);
 
             // 记录元数据
             _uiRegistry.Add(uiName, new UiMetadata
@@ -140,7 +139,7 @@ namespace BoomFramework
             _uiTypeToKey[typeof(T)] = uiName;
 
             _activeInstanceByKey.Remove(uiName);
-            Debug.Log($"[{GetType().Name}]注册UI {uiName}，层：{uILayer}");
+            // Debug.Log($"[{GetType().Name}]注册UI {uiName}，层：{uILayer}");
         }
 
         public T GetUI<T>() where T : UIBase

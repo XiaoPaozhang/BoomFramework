@@ -17,12 +17,12 @@ namespace BoomFramework
 
     public virtual void OnOpen(object arg)
     {
-      Debug.Log($"{GetType().Name} UI打开,参数：{arg}");
+    //   Debug.Log($"{GetType().Name} UI打开,参数：{arg}");
     }
 
     public virtual void OnClose()
     {
-      Debug.Log($"{GetType().Name} UI关闭");
+    //   Debug.Log($"{GetType().Name} UI关闭");
     }
 
   }
