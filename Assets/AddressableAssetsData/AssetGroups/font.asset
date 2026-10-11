@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bbb281ee3bf0b054c82ac2347e9e782c, type: 3}
+  m_Name: font
+  m_EditorClassIdentifier: 
+  m_GroupName: font
+  m_Data:
+    m_SerializedData: []
+  m_GUID: 6cbe2e11854546e4aaee8fa406b6cf03
+  m_SerializeEntries:
+  - m_GUID: bbc03201df53d6448b8f3c2c476d1792
+    m_Address: Assets/GameAssetsBundle/font/NotoSansSC/NotoSansSC-Regular SDF.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 82c5026546759d747af2846e7c96657a
+    m_Address: Assets/GameAssetsBundle/font/NotoSansSC/NotoSansSC-Regular.ttf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: 1cb1c41401a6b844aa08ef4629c70c26
+    m_Address: Assets/GameAssetsBundle/font/smiley-sans-v2.0.1/SmileySans-Oblique
+      SDF.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  - m_GUID: b7274fd9115c9524dbd7562e6adece0b
+    m_Address: Assets/GameAssetsBundle/font/smiley-sans-v2.0.1/SmileySans-Oblique.otf
+    m_ReadOnly: 0
+    m_SerializedLabels: []
+  m_ReadOnly: 0
+  m_Settings: {fileID: 11400000, guid: 3461bf8490bc0a94b837164161be30e5, type: 2}
+  m_SchemaSet:
+    m_Schemas:
+    - {fileID: 11400000, guid: 29c8fa8cf931e9444bb21ec000d20729, type: 2}
+    - {fileID: 11400000, guid: 3693da10ed04c6649ace5704509bc735, type: 2}
